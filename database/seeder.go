@@ -15,7 +15,7 @@ func SeedUsers(db *gorm.DB) {
 		{
 			Email:       "admin@example.com",
 			Password:    "adminpassword",
-			FirsName:    "Admin",
+			FirstName:   "Admin",
 			LastName:    "Test",
 			PhoneNumber: "1234567890",
 			Role:        "admin",
@@ -25,7 +25,7 @@ func SeedUsers(db *gorm.DB) {
 		{
 			Email:       "user@example.com",
 			Password:    "userpassword",
-			FirsName:    "Regular",
+			FirstName:   "Regular",
 			LastName:    "Test",
 			PhoneNumber: "0987654321",
 			Role:        "customer",
@@ -35,7 +35,7 @@ func SeedUsers(db *gorm.DB) {
 		{
 			Email:       "provider@example.com",
 			Password:    "providerpassword",
-			FirsName:    "Provider",
+			FirstName:   "Provider",
 			LastName:    "Test",
 			PhoneNumber: "1122334455",
 			Role:        "provider",

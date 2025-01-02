@@ -2,9 +2,8 @@ package main
 
 import (
 	"github.com/Junx27/ticket-booking/config"
-	"github.com/Junx27/ticket-booking/controller"
 	"github.com/Junx27/ticket-booking/database"
-	"github.com/Junx27/ticket-booking/repository"
+	"github.com/Junx27/ticket-booking/router"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,14 +13,10 @@ func main() {
 
 	db := database.Init(cfg, database.DBMigrator)
 	database.SeedUsers(db)
-
-	userRepository := repository.NewUserRepository(db)
-
-	userHandler := controller.NewUserHandler(userRepository)
+	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
-
-	r.GET("/users", userHandler.GetMany)
+	router.SetupUserRouter(r, db)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
