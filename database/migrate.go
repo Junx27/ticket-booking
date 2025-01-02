@@ -8,13 +8,26 @@ import (
 )
 
 func DBMigrator(db *gorm.DB) error {
-
-	if err := db.Migrator().DropTable(&entity.User{}); err != nil {
-		return fmt.Errorf("failed to drop table: %w", err)
+	entities := []interface{}{
+		&entity.User{},
+		&entity.Provider{},
+		&entity.Schedule{},
+		&entity.Booking{},
+		&entity.Payment{},
+		&entity.Cancellation{},
+		&entity.Notification{},
+		&entity.ActivityLog{},
+		&entity.AdminAction{},
 	}
-
-	if err := db.AutoMigrate(&entity.User{}); err != nil {
-		return fmt.Errorf("failed to migrate: %w", err)
+	for _, entity := range entities {
+		if err := db.Migrator().DropTable(entity); err != nil {
+			return fmt.Errorf("failed to drop table: %w", err)
+		}
+	}
+	for _, entity := range entities {
+		if err := db.AutoMigrate(entity); err != nil {
+			return fmt.Errorf("failed to migrate: %w", err)
+		}
 	}
 
 	return nil
