@@ -10,6 +10,8 @@ make start
 
 ## Table of Contents
 
+![User API Diagram](assets/erd.png)
+
 - [User Documentation](doc/user_doc.md)
 
 ## Introduction
