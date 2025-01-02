@@ -10,7 +10,7 @@ make start
 
 ## Table of Contents
 
-![User API Diagram](assets/erd.png)
+![User API Diagram](https://raw.githubusercontent.com/Junx27/ticket-booking/2-readme/doc/assets/erd.png)
 
 - [User Documentation](doc/user_doc.md)
 
