@@ -33,7 +33,7 @@ func (h *UserHandler) GetMany(ctx *gin.Context) {
 func (h *UserHandler) GetOne(ctx *gin.Context) {
 	userId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid user ID"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid user ID Not Found"))
 		return
 	}
 

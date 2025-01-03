@@ -10,3 +10,5 @@ type ActivityLog struct {
 	Timestamp   time.Time `json:"timestamp" gorm:"default:CURRENT_TIMESTAMP"`
 	User        User      `json:"user" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
+
+type ActivityLogRepository interface{}

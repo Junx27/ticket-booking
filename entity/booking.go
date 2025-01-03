@@ -16,3 +16,5 @@ type Booking struct {
 	Payments        []Payment      `json:"payments" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 	Cancellations   []Cancellation `json:"cancellations" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 }
+
+type BookingRepository interface{}

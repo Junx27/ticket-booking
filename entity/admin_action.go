@@ -10,3 +10,5 @@ type AdminAction struct {
 	ActionDate  time.Time `json:"action_date" gorm:"default:CURRENT_TIMESTAMP"`
 	User        User      `json:"admin" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
+
+type AdminActionRepository interface{}

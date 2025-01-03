@@ -11,3 +11,5 @@ type Notification struct {
 	CreatedAt        time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	User             User      `json:"user" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
+
+type NotificationRepository interface{}

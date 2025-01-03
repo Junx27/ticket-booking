@@ -11,3 +11,5 @@ type Payment struct {
 	PaymentDate   time.Time `json:"payment_date" gorm:"default:CURRENT_TIMESTAMP"`
 	Booking       Booking   `json:"booking" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 }
+
+type PaymentRepository interface{}

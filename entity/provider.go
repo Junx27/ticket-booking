@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Provider struct {
 	ID          uint       `json:"id" gorm:"primaryKey"`
@@ -13,4 +16,9 @@ type Provider struct {
 }
 
 type ProviderRepository interface {
+	GetMany(ctx context.Context) ([]*Provider, error)
+	GetOne(ctx context.Context, providerId uint) (*Provider, error)
+	CreateOne(ctx context.Context, provider *Provider) (*Provider, error)
+	UpdateOne(ctx context.Context, providerId uint, updateData map[string]interface{}) (*Provider, error)
+	DeleteOne(ctx context.Context, providerId uint) error
 }

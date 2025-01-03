@@ -9,3 +9,5 @@ type Cancellation struct {
 	CancellationDate   time.Time `json:"cancellation_date" gorm:"default:CURRENT_TIMESTAMP"`
 	Booking            Booking   `json:"booking" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 }
+
+type CancellationRepository interface{}
