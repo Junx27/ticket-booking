@@ -16,3 +16,5 @@ type Schedule struct {
 	Provider          Provider  `json:"provider" gorm:"foreignKey:ProviderID;constraint:OnDelete:CASCADE"`
 	Bookings          []Booking `json:"bookings" gorm:"foreignKey:ScheduleID;constraint:OnDelete:CASCADE"`
 }
+
+type ScheduleRepository interface{}
