@@ -24,11 +24,7 @@ func (r *UserRespository) GetMany(ctx context.Context) ([]*entity.User, error) {
 	}
 	return users, nil
 }
-<<<<<<< HEAD
-func (r *UserRespository) GetByID(ctx context.Context, userId uint) (*entity.UserWithRelation, error) {
-=======
 func (r *UserRespository) GetOne(ctx context.Context, userId uint) (*entity.UserWithRelation, error) {
->>>>>>> d89253a (feat: user feature)
 	user := &entity.UserWithRelation{}
 	res := r.db.Model(&user).Where("id = ?", userId).First(&user)
 
@@ -38,8 +34,6 @@ func (r *UserRespository) GetOne(ctx context.Context, userId uint) (*entity.User
 
 	return user, nil
 }
-<<<<<<< HEAD
-=======
 
 func (r *UserRespository) CreateOne(ctx context.Context, user *entity.User) (*entity.User, error) {
 	if err := r.db.WithContext(ctx).Create(user).Error; err != nil {
@@ -68,4 +62,3 @@ func (r *UserRespository) DeleteOne(ctx context.Context, userId uint) error {
 
 	return nil
 }
->>>>>>> d89253a (feat: user feature)
