@@ -18,10 +18,11 @@ func main() {
 	r := gin.Default()
 	router.SetupUserRouter(r, db)
 	router.SetupProviderRouter(r, db)
+	router.SetupScheduleRouter(r, db)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "system ok",
+			"message": "booking service is work!",
 		})
 	})
 
