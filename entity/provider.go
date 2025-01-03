@@ -11,3 +11,9 @@ type Provider struct {
 	UpdatedAt   time.Time  `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
 	Schedules   []Schedule `json:"schedules" gorm:"foreignKey:ProviderID;constraint:OnDelete:CASCADE"`
 }
+<<<<<<< HEAD
+=======
+
+type ProviderRepository interface {
+}
+>>>>>>> d89253a (feat: user feature)
