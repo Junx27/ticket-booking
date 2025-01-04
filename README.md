@@ -6,8 +6,6 @@
 make start
 ```
 
-# My GitHub Repository
-
 ## Statistics
 
 - **Open Issues**: ![Open Issues](https://img.shields.io/github/issues/Junx27/ticket-booking.svg)
