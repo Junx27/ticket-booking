@@ -9,9 +9,9 @@ make start
 ## Statistics
 
 <p>
-  <strong>Open Issues</strong>: <img src="https://img.shields.io/github/issues/Junx27/ticket-booking.svg" alt="Open Issues">
-  <strong>Commits this month</strong>: <img src="https://img.shields.io/github/commit-activity/m/Junx27/ticket-booking.svg" alt="Commits">
-  <strong>Open Pull Requests</strong>: <img src="https://img.shields.io/github/issues-pr/Junx27/ticket-booking.svg" alt="Open Pull Requests">
+  <img src="https://img.shields.io/github/issues/Junx27/ticket-booking.svg" alt="Open Issues">
+  <img src="https://img.shields.io/github/commit-activity/m/Junx27/ticket-booking.svg" alt="Commits">
+  <img src="https://img.shields.io/github/issues-pr/Junx27/ticket-booking.svg" alt="Open Pull Requests">
 </p>
 
 ## Table of Contents
