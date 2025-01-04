@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Payment struct {
 	ID            uint      `json:"id" gorm:"primaryKey"`
@@ -12,4 +15,10 @@ type Payment struct {
 	Booking       Booking   `json:"booking" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 }
 
-type PaymentRepository interface{}
+type PaymentRepository interface {
+	GetMany(ctx context.Context) ([]*Payment, error)
+	GetOne(ctx context.Context, paymentId uint) (*Payment, error)
+	CreateOne(ctx context.Context, payment *Payment) (*Payment, error)
+	UpdateOne(ctx context.Context, paymentId uint, updateData map[string]interface{}) (*Payment, error)
+	DeleteOne(ctx context.Context, paymentId uint) error
+}
