@@ -12,6 +12,7 @@ make start
 
 ![User API Diagram](https://raw.githubusercontent.com/Junx27/ticket-booking/2-readme/doc/assets/erd.png)
 
+- [Postman Documentation](https://documenter.getpostman.com/view/32448213/2sAYJ99yCx)
 - [User Documentation](doc/user.md)
 - [Cancellation Documentation](doc/cancellation.md)
 
