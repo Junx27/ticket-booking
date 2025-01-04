@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Cancellation struct {
 	ID                 uint      `json:"id" gorm:"primaryKey"`
@@ -10,4 +13,11 @@ type Cancellation struct {
 	Booking            Booking   `json:"booking" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 }
 
-type CancellationRepository interface{}
+type CancellationRepository interface {
+	GetMany(ctx context.Context) ([]*Cancellation, error)
+	GetManyByBookingID(ctx context.Context, bookingId uint) ([]*Cancellation, error)
+	GetOne(ctx context.Context, cancellationId uint) (*Cancellation, error)
+	CreateOne(ctx context.Context, cancellation *Cancellation) (*Cancellation, error)
+	DeleteOne(ctx context.Context, cancellationId uint) error
+	DeleteMany(ctx context.Context) error
+}
