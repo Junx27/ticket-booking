@@ -8,9 +8,11 @@ make start
 
 ## Statistics
 
-- **Open Issues**: ![Open Issues](https://img.shields.io/github/issues/Junx27/ticket-booking.svg)
-- **Commits this month**: ![Commits](https://img.shields.io/github/commit-activity/m/Junx27/ticket-booking.svg)
-- **Open Pull Requests**: ![Open Pull Requests](https://img.shields.io/github/issues-pr/Junx27/ticket-booking.svg)
+<p>
+  <strong>Open Issues</strong>: <img src="https://img.shields.io/github/issues/Junx27/ticket-booking.svg" alt="Open Issues">
+  <strong>Commits this month</strong>: <img src="https://img.shields.io/github/commit-activity/m/Junx27/ticket-booking.svg" alt="Commits">
+  <strong>Open Pull Requests</strong>: <img src="https://img.shields.io/github/issues-pr/Junx27/ticket-booking.svg" alt="Open Pull Requests">
+</p>
 
 ## Table of Contents
 
