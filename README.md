@@ -12,7 +12,8 @@ make start
 
 ![User API Diagram](https://raw.githubusercontent.com/Junx27/ticket-booking/2-readme/doc/assets/erd.png)
 
-- [User Documentation](doc/user_doc.md)
+- [User Documentation](doc/user.md)
+- [Cancellation Documentation](doc/cancellation.md)
 
 ## Introduction
 
