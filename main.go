@@ -19,6 +19,7 @@ func main() {
 	router.SetupUserRouter(r, db)
 	router.SetupProviderRouter(r, db)
 	router.SetupScheduleRouter(r, db)
+	router.SetupBookingRouter(r, db)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
