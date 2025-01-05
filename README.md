@@ -27,11 +27,18 @@ make start
 
 ## Preview Table of Contents
 
-![Desain Database](https://raw.githubusercontent.com/Junx27/ticket-booking/2-readme/doc/assets/erd.png)
 ![Desain Database Relational](https://raw.githubusercontent.com/Junx27/ticket-booking/22-admin-action/doc/assets/relation.png)
 
 # Ticket Booking Documentation
 
 - [API Documentation](https://documenter.getpostman.com/view/32448213/2sAYJ99yCx)
 - [User Documentation](doc/user.md)
+- [Provider Documentation](doc/provider.md)
+- [Schedule Documentation](doc/schedule.md)
+- [Booking Documentation](doc/booking.md)
+- [Notification Documentation](doc/notification.md)
 - [Cancellation Documentation](doc/cancellation.md)
+- [Payment Documentation](doc/payment.md)
+- [Ticket Usage Documentation](doc/ticket-usage.md)
+- [Activity Log Documentation](doc/activity-log.md)
+- [Refund Documentation](doc/refund.md)
