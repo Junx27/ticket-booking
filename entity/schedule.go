@@ -30,3 +30,12 @@ type ScheduleRepository interface {
 	UpdateSeatsStatus(ctx context.Context, scheduleId uint, seatsData map[int]interface{}) (*Schedule, error)
 	DeleteOne(ctx context.Context, scheduleId uint) error
 }
+
+func (s *Schedule) IsSeatAvailable(seatNumber int64) bool {
+	for _, seat := range s.AvailableSeats {
+		if seat == seatNumber {
+			return true
+		}
+	}
+	return false
+}

@@ -2,21 +2,28 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/Junx27/ticket-booking/entity"
 	"github.com/Junx27/ticket-booking/helper"
+	"github.com/Junx27/ticket-booking/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type BookingHandler struct {
-	repository entity.BookingRepository
+	repository      entity.BookingRepository
+	scheduleHandler *ScheduleHandler
 }
 
-func NewBookingHandler(repo entity.BookingRepository) *BookingHandler {
+func NewBookingHandler(
+	bookingRepo entity.BookingRepository,
+	scheduleHandler *ScheduleHandler,
+) *BookingHandler {
 	return &BookingHandler{
-		repository: repo,
+		repository:      bookingRepo,
+		scheduleHandler: scheduleHandler,
 	}
 }
 
@@ -49,17 +56,49 @@ func (h *BookingHandler) GetOne(ctx *gin.Context) {
 func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 	var booking entity.Booking
 	if err := ctx.ShouldBindJSON(&booking); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid request payload"))
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
+	}
+	schedule, err := h.scheduleHandler.repository.GetOne(context.Background(), booking.ScheduleID)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Schedule not found"})
 		return
 	}
 
+	var unavailableSeats []int
+	for _, seat := range booking.SeatNumbers {
+		if !schedule.IsSeatAvailable(seat) {
+			unavailableSeats = append(unavailableSeats, int(seat))
+		}
+	}
+
+	if len(unavailableSeats) > 0 {
+		ctx.JSON(http.StatusConflict, gin.H{
+			"error": fmt.Sprintf("Seats %v are not available", unavailableSeats),
+		})
+		return
+	}
+
+	booking.NumberOfTickets = helper.GenerateTicketNumber()
 	createdBooking, err := h.repository.CreateOne(context.Background(), &booking)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create booking"))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create booking"})
 		return
 	}
-
-	ctx.JSON(http.StatusCreated, helper.SuccessResponse("Create data booking successfully", createdBooking))
+	seatsData := make(map[string]string)
+	for _, seat := range booking.SeatNumbers {
+		seatsData[fmt.Sprint(seat)] = "booked"
+	}
+	err = utils.UpdateSeatsStatus(schedule.ID, seatsData)
+	if err != nil {
+		h.repository.DeleteOne(context.Background(), createdBooking.ID)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update seat status"})
+		return
+	}
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "Booking created successfully",
+		"data":    createdBooking,
+	})
 }
 
 func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
