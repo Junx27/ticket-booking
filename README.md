@@ -14,7 +14,18 @@ make start
   <img src="https://img.shields.io/github/issues-pr/Junx27/ticket-booking.svg" alt="Open Pull Requests">
 </p>
 
-## Table of Contents
+## System Requirements Analysis
+
+- [Requirement Elicitation#1](https://docs.google.com/document/u/0/d/1uWEUDD5RCThhmIXDOjS9lceEy1u1FqWsIgRy-94cVnk/edit)
+- [Requirement Elicitation#2](https://docs.google.com/document/u/0/d/1vMzj3TpQ9t8J-C_U45QRpiuilNgUlA47Ws19bHJQfVI/edit)
+- [Business Flow#1](https://docs.google.com/document/u/0/d/1Yf94DWJSBakk6pYWZcUSEPjiJT_3njH5_dndVgDC97E/edit)
+- [Business Flow#2](https://docs.google.com/document/u/0/d/1eofdyvqhPa1HgASQvBZdIKj1t3OSrI9PwaYiZL5xXyE/edit)
+- [Business Flow#3](https://docs.google.com/document/u/0/d/14U06q5POCDo7fjXwouKsmJwC0feidf2kIcWxaPWqLRk/edit)
+- [Desain Database#1](https://docs.google.com/document/u/0/d/19aTUEGYf81poYvdAuC-A1x9JU3nJEg5k0gHiqYcLhvs/edit)
+- [Desain Database#2](https://docs.google.com/document/u/0/d/10JtjzfqHlNchirLqUX8n8sW3Fp1fJWKV9H-dcrmU46M/edit)
+- [Desain Relational Database](https://dbdiagram.io/d/6774acea5406798ef7057c12)
+
+## Preview Table of Contents
 
 ![User API Diagram](https://raw.githubusercontent.com/Junx27/ticket-booking/2-readme/doc/assets/erd.png)
 
