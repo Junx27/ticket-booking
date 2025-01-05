@@ -18,6 +18,8 @@ type Booking struct {
 	Schedule        Schedule       `json:"schedule" gorm:"foreignKey:ScheduleID;constraint:OnDelete:CASCADE"`
 	Payments        []Payment      `json:"payments" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 	Cancellations   []Cancellation `json:"cancellations" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
+	TicketUsages    []TicketUsage  `json:"ticket_usages" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
+	Refunds         []Refund       `json:"refunds" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 }
 
 type BookingRepository interface {

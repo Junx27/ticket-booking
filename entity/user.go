@@ -29,7 +29,6 @@ type UserWithRelation struct {
 	Bookings      []Booking      `json:"bookings" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	Notifications []Notification `json:"notifications" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	ActivityLogs  []ActivityLog  `json:"activity_logs" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	AdminActions  []AdminAction  `json:"admin_actions" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 func (UserWithRelation) TableName() string {
