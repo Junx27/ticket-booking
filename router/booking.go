@@ -9,7 +9,9 @@ import (
 
 func SetupBookingRouter(r *gin.Engine, db *gorm.DB) {
 	bookingRepository := repository.NewBookingRepository(db)
-	bookingHandler := controller.NewBookingHandler(bookingRepository)
+	scheduleRepository := repository.NewScheduleRepository(db)
+	scheduleHandler := controller.NewScheduleHandler(scheduleRepository)
+	bookingHandler := controller.NewBookingHandler(bookingRepository, scheduleHandler)
 
 	bookingGroup := r.Group("/bookings")
 	{
