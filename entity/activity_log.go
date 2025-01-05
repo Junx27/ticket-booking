@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type ActivityLog struct {
 	ID          uint      `json:"id" gorm:"primaryKey"`
@@ -11,4 +14,11 @@ type ActivityLog struct {
 	User        User      `json:"user" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
-type ActivityLogRepository interface{}
+type ActivityLogRepository interface {
+	GetMany(ctx context.Context) ([]*ActivityLog, error)
+	GetManyByUser(ctx context.Context, userId uint) ([]*ActivityLog, error)
+	GetOne(ctx context.Context, activityLogId uint) (*ActivityLog, error)
+	CreateOne(ctx context.Context, activityLog *ActivityLog) (*ActivityLog, error)
+	DeleteOne(ctx context.Context, activityLogId uint) error
+	DeleteMany(ctx context.Context) error
+}

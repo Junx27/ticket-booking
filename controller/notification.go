@@ -30,7 +30,7 @@ func (h *NotificationHandler) GetMany(ctx *gin.Context) {
 }
 
 func (h *NotificationHandler) GetManyByUser(ctx *gin.Context) {
-	userId, err := strconv.Atoi(ctx.Param("userId"))
+	userId, err := strconv.Atoi(ctx.Param("user_id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid user ID"))
 		return
@@ -114,7 +114,7 @@ func (h *NotificationHandler) DeleteOne(ctx *gin.Context) {
 }
 
 func (h *NotificationHandler) DeleteAllByUser(ctx *gin.Context) {
-	userId, err := strconv.Atoi(ctx.Param("userId"))
+	userId, err := strconv.Atoi(ctx.Param("user_id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid user ID"))
 		return
