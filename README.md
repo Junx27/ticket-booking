@@ -27,7 +27,8 @@ make start
 
 ## Preview Table of Contents
 
-![User API Diagram](https://raw.githubusercontent.com/Junx27/ticket-booking/2-readme/doc/assets/erd.png)
+![Desain Database](https://raw.githubusercontent.com/Junx27/ticket-booking/2-readme/doc/assets/erd.png)
+![Desain Database Relational](https://raw.githubusercontent.com/Junx27/ticket-booking/2-readme/doc/assets/relational.png)
 
 # Ticket Booking Documentation
 
