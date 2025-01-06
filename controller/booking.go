@@ -8,7 +8,6 @@ import (
 
 	"github.com/Junx27/ticket-booking/entity"
 	"github.com/Junx27/ticket-booking/helper"
-	"github.com/Junx27/ticket-booking/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -59,9 +58,20 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
+
 	schedule, err := h.scheduleHandler.repository.GetOne(context.Background(), booking.ScheduleID)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Schedule not found"})
+		return
+	}
+
+	if schedule.TicketPrice == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ticket price cannot be zero"})
+		return
+	}
+
+	if len(booking.SeatNumbers) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "At least one seat must be selected"})
 		return
 	}
 
@@ -79,22 +89,34 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 		return
 	}
 
-	booking.NumberOfTickets = helper.GenerateTicketNumber()
+	booking.TicketCode = helper.GenerateTicketNumber(booking.UserID, booking.ScheduleID)
+
+	booking.TotalAmount = schedule.TicketPrice * float64(len(booking.SeatNumbers))
+
+	if booking.TotalAmount <= 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Total amount must be greater than zero"})
+		return
+	}
+
 	createdBooking, err := h.repository.CreateOne(context.Background(), &booking)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create booking"})
 		return
 	}
-	seatsData := make(map[string]string)
+
+	seatsData := make(map[int]interface{})
 	for _, seat := range booking.SeatNumbers {
-		seatsData[fmt.Sprint(seat)] = "booked"
+		seatsData[int(seat)] = "booked"
 	}
-	err = utils.UpdateSeatsStatus(schedule.ID, seatsData)
+
+	scheduleId := schedule.ID
+	_, err = h.scheduleHandler.repository.UpdateSeatsStatus(context.Background(), scheduleId, seatsData)
 	if err != nil {
 		h.repository.DeleteOne(context.Background(), createdBooking.ID)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update seat status"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update schedule"})
 		return
 	}
+
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "Booking created successfully",
 		"data":    createdBooking,
