@@ -25,6 +25,7 @@ func main() {
 	router.SetupCancellationRouter(r, db)
 	router.SetupActivityLogRouter(r, db)
 	router.SetupRefundRouter(r, db)
+	router.SetupTicketUsageRouter(r, db)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{

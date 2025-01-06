@@ -48,7 +48,7 @@ func (h *RefundHandler) GetOne(ctx *gin.Context) {
 func (h *RefundHandler) CreateOne(ctx *gin.Context) {
 	var refund entity.Refund
 	if err := ctx.ShouldBindJSON(&refund); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid request patload"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid request payload"))
 		return
 	}
 
