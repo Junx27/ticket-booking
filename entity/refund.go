@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Refund struct {
 	ID                uint      `json:"id" gorm:"primaryKey"`
@@ -13,4 +16,12 @@ type Refund struct {
 	CreatedAt         time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	UpdatedAt         time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
 	Booking           Booking   `json:"booking" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
+}
+
+type RefundRepository interface {
+	GetMany(ctx context.Context) ([]*Refund, error)
+	GetOne(ctx context.Context, refundId uint) (*Refund, error)
+	CreateOne(ctx context.Context, refund *Refund) (*Refund, error)
+	UpdateOne(ctx context.Context, refundId uint, updateData map[string]interface{}) (*Refund, error)
+	DeleteOne(ctx context.Context, refundId uint) error
 }
