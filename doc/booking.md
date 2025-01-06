@@ -4,19 +4,19 @@ In this booking transaction, the user will make a booking with the initial booki
 
 - cancellation without charge
 
-````json
+```json
 {
-    "booking_status": "cancel"
+  "booking_status": "cancel"
 }
-``
+```
 
 before
 
 ```json
 {
-    "available_seats": [1,2]
+  "available_seats": [1, 2]
 }
-````
+```
 
 after
 
@@ -28,19 +28,19 @@ after
 
 - cancellation after payment
 
-````json
+```json
 {
-    "booking_status": "cancel"
+  "booking_status": "cancel"
 }
-``
+```
 
 before
 
 ```json
 {
-    "available_seats": [1,2]
+  "available_seats": [1, 2]
 }
-````
+```
 
 after
 
@@ -52,19 +52,19 @@ after
 
 - cancellation status pending
 
-````json
+```json
 {
-    "booking_status": "cancel"
+  "booking_status": "cancel"
 }
-``
+```
 
 before
 
 ```json
 {
-    "available_seats": [1,2]
+  "available_seats": [1, 2]
 }
-````
+```
 
 after
 
@@ -76,19 +76,19 @@ after
 
 - deleting status pending
 
-````json
+```json
 {
-    "booking_status": "cancel"
+  "booking_status": "cancel"
 }
-``
+```
 
 before
 
 ```json
 {
-    "available_seats": [1,2]
+  "available_seats": [1, 2]
 }
-````
+```
 
 after
 
