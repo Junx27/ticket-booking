@@ -18,6 +18,5 @@ func SetupScheduleRouter(r *gin.Engine, db *gorm.DB) {
 		scheduleGroup.POST("/", scheduleHandler.CreateOne)
 		scheduleGroup.PUT("/:id", scheduleHandler.UpdateOne)
 		scheduleGroup.DELETE("/:id", scheduleHandler.DeleteOne)
-		scheduleGroup.PUT("/:id/seats", scheduleHandler.UpdateSeatsStatus)
 	}
 }
