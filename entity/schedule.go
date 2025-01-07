@@ -9,6 +9,7 @@ import (
 
 type Schedule struct {
 	ID                uint          `json:"id" gorm:"primaryKey"`
+	UserID            uint          `json:"user_id"`
 	ProviderID        uint          `json:"provider_id"`
 	DepartureTime     time.Time     `json:"departure_time" gorm:"not null"`
 	ArrivalTime       time.Time     `json:"arrival_time" gorm:"not null"`

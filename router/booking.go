@@ -12,10 +12,12 @@ func SetupBookingRouter(r *gin.Engine, db *gorm.DB) {
 	scheduleRepository := repository.NewScheduleRepository(db)
 	activityLogRepository := repository.NewActivityLogRepository(db)
 	cancellationRepository := repository.NewCancellationRepository(db)
+	notificationRepository := repository.NewNotificationRepository(db)
 	scheduleHandler := controller.NewScheduleHandler(scheduleRepository)
 	activityLogHandler := controller.NewActivityLogHandler(activityLogRepository)
 	cancellatonHandler := controller.NewCancellationHandler(cancellationRepository)
-	bookingHandler := controller.NewBookingHandler(bookingRepository, scheduleHandler, activityLogHandler, cancellatonHandler)
+	notificationHandler := controller.NewNotificationHandler(notificationRepository)
+	bookingHandler := controller.NewBookingHandler(bookingRepository, scheduleHandler, activityLogHandler, cancellatonHandler, notificationHandler)
 
 	bookingGroup := r.Group("/bookings")
 	{

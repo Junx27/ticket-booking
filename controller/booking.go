@@ -16,6 +16,7 @@ type BookingHandler struct {
 	scheduleHandler     *ScheduleHandler
 	activityLogHandler  *ActivityLogHandler
 	cancellationHandler *CancellationHandler
+	notificationHandler *NotificationHandler
 }
 
 func NewBookingHandler(
@@ -23,6 +24,7 @@ func NewBookingHandler(
 	scheduleHandler *ScheduleHandler,
 	activityLogHandler *ActivityLogHandler,
 	cancellationHandler *CancellationHandler,
+	notificationHandler *NotificationHandler,
 
 ) *BookingHandler {
 	return &BookingHandler{
@@ -30,6 +32,7 @@ func NewBookingHandler(
 		scheduleHandler:     scheduleHandler,
 		activityLogHandler:  activityLogHandler,
 		cancellationHandler: cancellationHandler,
+		notificationHandler: notificationHandler,
 	}
 }
 
@@ -131,6 +134,17 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 	_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+		return
+	}
+
+	notification := entity.Notification{
+		UserID:  booking.UserID,
+		Message: "Booking ticket successfully, please payment to complete!",
+	}
+
+	_, err = h.notificationHandler.repository.CreateOne(context.Background(), &notification)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create notification"))
 		return
 	}
 
@@ -271,16 +285,15 @@ func (h *BookingHandler) DeleteOne(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to delete booking"))
 		return
 	}
-
 	activityLog := entity.ActivityLog{
 		UserID:      booking.UserID,
-		Description: "Delete booking is successfully",
+		Description: fmt.Sprintf("Deleted booking id %d status %s successfully", booking.ID, booking.BookingStatus),
 	}
+
 	_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
 		return
 	}
-
 	ctx.JSON(http.StatusOK, helper.SuccessResponse("Delete data booking successfully", nil))
 }
