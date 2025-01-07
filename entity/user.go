@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-type BaseModel struct{}
+type BaseModelUser struct{}
 
-func (BaseModel) TableName() string {
+func (BaseModelUser) TableName() string {
 	return "users"
 }
 
@@ -23,7 +23,7 @@ type User struct {
 	UpdatedAt   time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
 }
 type UserDetailResponse struct {
-	BaseModel
+	BaseModelUser
 	ID          uint   `json:"-" gorm:"primaryKey"`
 	Email       string `json:"email" gorm:"unique;not null"`
 	FirstName   string `json:"first_name" gorm:"not null"`
@@ -31,7 +31,7 @@ type UserDetailResponse struct {
 }
 
 type UserWithRelation struct {
-	BaseModel
+	BaseModelUser
 	ID            uint           `json:"id" gorm:"primaryKey"`
 	Email         string         `json:"email" gorm:"unique;not null"`
 	Password      string         `json:"password" gorm:"not null"`
