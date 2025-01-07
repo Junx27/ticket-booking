@@ -11,12 +11,14 @@ import (
 )
 
 type PaymentHandler struct {
-	repository entity.PaymentRepository
+	repository         entity.PaymentRepository
+	ticketUsageHandler *TicketUsageHanlder
 }
 
-func NewPaymentHandler(repo entity.PaymentRepository) *PaymentHandler {
+func NewPaymentHandler(repo entity.PaymentRepository, ticketUsageHandler *TicketUsageHanlder) *PaymentHandler {
 	return &PaymentHandler{
-		repository: repo,
+		repository:         repo,
+		ticketUsageHandler: ticketUsageHandler,
 	}
 }
 
@@ -55,6 +57,15 @@ func (h *PaymentHandler) CreateOne(ctx *gin.Context) {
 	createdPayment, err := h.repository.CreateOne(context.Background(), &payment)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create payment"))
+		return
+	}
+
+	ticketUsage := entity.TicketUsage{
+		BookingID: payment.BookingID,
+	}
+	_, err = h.ticketUsageHandler.repository.CreateOne(context.Background(), &ticketUsage)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create ticket usage"))
 		return
 	}
 

@@ -15,7 +15,6 @@ func SetupTicketUsageRouter(r *gin.Engine, db *gorm.DB) {
 	{
 		ticketUsageGroup.GET("/", ticketUsageHandler.GetMany)
 		ticketUsageGroup.GET("/:id", ticketUsageHandler.GetOne)
-		ticketUsageGroup.POST("/", ticketUsageHandler.CreateOne)
 		ticketUsageGroup.PUT("/:id", ticketUsageHandler.UpdateOne)
 		ticketUsageGroup.DELETE("/:id", ticketUsageHandler.DeleteOne)
 	}

@@ -11,8 +11,6 @@ type TicketUsage struct {
 	IsUsed    bool      `json:"is_used" gorm:"default:false"`
 	UsedAt    time.Time `json:"used_at"`
 	CreatedAt time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
-	Booking   Booking   `json:"booking" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 }
 
 type TicketUsageRepository interface {
