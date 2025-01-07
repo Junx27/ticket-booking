@@ -6,6 +6,12 @@
 make start
 ```
 
+## Set Down Project
+
+```bash
+make stop
+```
+
 ## Statistics
 
 <p>
