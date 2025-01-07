@@ -16,7 +16,6 @@ func SetupActivityLogRouter(r *gin.Engine, db *gorm.DB) {
 		activityLogGroup.GET("/", activityLogHandler.GetMany)
 		activityLogGroup.GET("/activity-log/:user_id", activityLogHandler.GetManyByUser)
 		activityLogGroup.GET("/:id", activityLogHandler.GetOne)
-		activityLogGroup.POST("/", activityLogHandler.CreateOne)
 		activityLogGroup.DELETE("/:id", activityLogHandler.DeleteOne)
 		activityLogGroup.DELETE("/", activityLogHandler.DeleteMany)
 	}

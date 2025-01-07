@@ -126,17 +126,13 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 		ActionType:  "CREATE BOOKING",
 		Description: "Create booking is successfully",
 	}
-	createdActivityLog, err := h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
+	_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{
-		"message":      "Booking created successfully",
-		"booking":      createdBooking,
-		"activity_log": createdActivityLog,
-	})
+	ctx.JSON(http.StatusCreated, helper.SuccessResponse("Booking created successfully", createdBooking))
 }
 func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 	bookingId, err := strconv.Atoi(ctx.Param("id"))
@@ -190,6 +186,16 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 			return
 		}
 	}
+	activityLog := entity.ActivityLog{
+		UserID:      booking.UserID,
+		ActionType:  "UPDATE BOOKING",
+		Description: fmt.Sprintf("Booking id %d update to %s is successfully", booking.ID, booking.BookingStatus),
+	}
+	_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+		return
+	}
 	ctx.JSON(http.StatusOK, helper.SuccessResponse("Update data booking successfully", updatedBooking))
 }
 
@@ -223,6 +229,17 @@ func (h *BookingHandler) DeleteOne(ctx *gin.Context) {
 	err = h.repository.DeleteOne(context.Background(), uint(bookingId))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to delete booking"))
+		return
+	}
+
+	activityLog := entity.ActivityLog{
+		UserID:      booking.UserID,
+		ActionType:  "DELETE BOOKING",
+		Description: "Delete booking is successfully",
+	}
+	_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
 		return
 	}
 
