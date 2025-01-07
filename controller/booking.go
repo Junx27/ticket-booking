@@ -12,17 +12,21 @@ import (
 )
 
 type BookingHandler struct {
-	repository      entity.BookingRepository
-	scheduleHandler *ScheduleHandler
+	repository         entity.BookingRepository
+	scheduleHandler    *ScheduleHandler
+	activityLogHandler *ActivityLogHandler
 }
 
 func NewBookingHandler(
 	bookingRepo entity.BookingRepository,
 	scheduleHandler *ScheduleHandler,
+	activityLogHandler *ActivityLogHandler,
+
 ) *BookingHandler {
 	return &BookingHandler{
-		repository:      bookingRepo,
-		scheduleHandler: scheduleHandler,
+		repository:         bookingRepo,
+		scheduleHandler:    scheduleHandler,
+		activityLogHandler: activityLogHandler,
 	}
 }
 
@@ -116,7 +120,23 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update schedule"})
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Booking created successfully", createdBooking))
+
+	activityLog := entity.ActivityLog{
+		UserID:      booking.UserID,
+		ActionType:  "CREATE BOOKING",
+		Description: "Create booking is successfully",
+	}
+	createdActivityLog, err := h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message":      "Booking created successfully",
+		"booking":      createdBooking,
+		"activity_log": createdActivityLog,
+	})
 }
 func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 	bookingId, err := strconv.Atoi(ctx.Param("id"))
