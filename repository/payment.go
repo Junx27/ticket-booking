@@ -25,9 +25,9 @@ func (r *PaymentRepository) GetMany(ctx context.Context) ([]*entity.Payment, err
 	return payments, nil
 }
 
-func (r *PaymentRepository) GetOne(ctx context.Context, paymentId uint) (*entity.Payment, error) {
-	payment := &entity.Payment{}
-	if err := r.db.WithContext(ctx).Where("id = ?", paymentId).First(&payment).Error; err != nil {
+func (r *PaymentRepository) GetOne(ctx context.Context, paymentId uint) (*entity.PaymentWithRelation, error) {
+	payment := &entity.PaymentWithRelation{}
+	if err := r.db.WithContext(ctx).Preload("Booking").Where("id = ?", paymentId).First(&payment).Error; err != nil {
 		return nil, err
 	}
 	return payment, nil
