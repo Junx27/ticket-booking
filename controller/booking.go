@@ -12,21 +12,24 @@ import (
 )
 
 type BookingHandler struct {
-	repository         entity.BookingRepository
-	scheduleHandler    *ScheduleHandler
-	activityLogHandler *ActivityLogHandler
+	repository          entity.BookingRepository
+	scheduleHandler     *ScheduleHandler
+	activityLogHandler  *ActivityLogHandler
+	cancellationHandler *CancellationHandler
 }
 
 func NewBookingHandler(
 	bookingRepo entity.BookingRepository,
 	scheduleHandler *ScheduleHandler,
 	activityLogHandler *ActivityLogHandler,
+	cancellationHandler *CancellationHandler,
 
 ) *BookingHandler {
 	return &BookingHandler{
-		repository:         bookingRepo,
-		scheduleHandler:    scheduleHandler,
-		activityLogHandler: activityLogHandler,
+		repository:          bookingRepo,
+		scheduleHandler:     scheduleHandler,
+		activityLogHandler:  activityLogHandler,
+		cancellationHandler: cancellationHandler,
 	}
 }
 
@@ -123,7 +126,6 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 
 	activityLog := entity.ActivityLog{
 		UserID:      booking.UserID,
-		ActionType:  "CREATE BOOKING",
 		Description: "Create booking is successfully",
 	}
 	_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
@@ -145,6 +147,44 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch booking"))
 		return
+	}
+
+	switch booking.BookingStatus {
+	case "pending":
+		activityLog := entity.ActivityLog{
+			UserID:      booking.UserID,
+			Description: fmt.Sprintf("Booking id %d updated from %s to confirm successfully", booking.ID, booking.BookingStatus),
+		}
+
+		_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+			return
+		}
+	case "cancel":
+		activityLog := entity.ActivityLog{
+			UserID:      booking.UserID,
+			Description: fmt.Sprintf("Booking id %d updated from %s to payment successfully", booking.ID, booking.BookingStatus),
+		}
+
+		_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+			return
+		}
+	case "payment":
+		activityLog := entity.ActivityLog{
+			UserID:      booking.UserID,
+			ActionType:  "NOTICE",
+			Description: fmt.Sprintf("Booking id %d updated from %s to cancel successfully", booking.ID, booking.BookingStatus),
+		}
+
+		_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+			return
+		}
+	default:
 	}
 	var updateData entity.Booking
 	if err := ctx.ShouldBindJSON(&updateData); err != nil {
@@ -171,6 +211,15 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 		return
 	}
 	if updateData.BookingStatus == "cancel" {
+		cancellation := entity.Cancellation{
+			BookingID:          booking.ID,
+			CancellationReason: fmt.Sprintf("Booking id %d cancellation is successfully", booking.ID),
+		}
+		_, err := h.cancellationHandler.repository.CreateOne(context.Background(), &cancellation)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create cancellation"))
+			return
+		}
 		var seatsData = make(map[int]interface{})
 		for _, seat := range booking.SeatNumbers {
 			seatsData[int(seat)] = "cancel"
@@ -186,16 +235,7 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 			return
 		}
 	}
-	activityLog := entity.ActivityLog{
-		UserID:      booking.UserID,
-		ActionType:  "UPDATE BOOKING",
-		Description: fmt.Sprintf("Booking id %d update to %s is successfully", booking.ID, booking.BookingStatus),
-	}
-	_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
-		return
-	}
+
 	ctx.JSON(http.StatusOK, helper.SuccessResponse("Update data booking successfully", updatedBooking))
 }
 
@@ -234,7 +274,6 @@ func (h *BookingHandler) DeleteOne(ctx *gin.Context) {
 
 	activityLog := entity.ActivityLog{
 		UserID:      booking.UserID,
-		ActionType:  "DELETE BOOKING",
 		Description: "Delete booking is successfully",
 	}
 	_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)

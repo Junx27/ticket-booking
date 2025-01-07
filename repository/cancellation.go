@@ -19,7 +19,7 @@ func NewCancellationRepository(db *gorm.DB) entity.CancellationRepository {
 
 func (r *CancellationRepository) GetMany(ctx context.Context) ([]*entity.Cancellation, error) {
 	var cancellations []*entity.Cancellation
-	if err := r.db.WithContext(ctx).Find(&cancellations).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Booking").Find(&cancellations).Error; err != nil {
 		return nil, err
 	}
 	return cancellations, nil

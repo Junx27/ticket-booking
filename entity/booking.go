@@ -7,7 +7,14 @@ import (
 	"github.com/lib/pq"
 )
 
+type BaseModelBooking struct{}
+
+func (BaseModelBooking) TableName() string {
+	return "bookings"
+}
+
 type Booking struct {
+	BaseModelBooking
 	ID            uint          `json:"id" gorm:"primaryKey"`
 	UserID        uint          `json:"user_id"`
 	ScheduleID    uint          `json:"schedule_id"`
@@ -20,6 +27,7 @@ type Booking struct {
 }
 
 type BookingWithRelation struct {
+	BaseModelBooking
 	ID            uint           `json:"id" gorm:"primaryKey"`
 	UserID        uint           `json:"user_id"`
 	ScheduleID    uint           `json:"schedule_id"`
@@ -35,10 +43,6 @@ type BookingWithRelation struct {
 	Cancellations []Cancellation `json:"cancellations" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 	TicketUsages  []TicketUsage  `json:"ticket_usages" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 	Refunds       []Refund       `json:"refunds" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
-}
-
-func (BookingWithRelation) TableName() string {
-	return "bookings"
 }
 
 type BookingRepository interface {
