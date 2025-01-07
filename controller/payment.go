@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,14 +12,26 @@ import (
 )
 
 type PaymentHandler struct {
-	repository         entity.PaymentRepository
-	ticketUsageHandler *TicketUsageHanlder
+	repository          entity.PaymentRepository
+	ticketUsageHandler  *TicketUsageHanlder
+	bookingHandler      *BookingHandler
+	activityLogHandler  *ActivityLogHandler
+	notificationHandler *NotificationHandler
 }
 
-func NewPaymentHandler(repo entity.PaymentRepository, ticketUsageHandler *TicketUsageHanlder) *PaymentHandler {
+func NewPaymentHandler(
+	repo entity.PaymentRepository,
+	ticketUsageHandler *TicketUsageHanlder,
+	bookingHandler *BookingHandler,
+	activityLogHandler *ActivityLogHandler,
+	notificationHandler *NotificationHandler,
+) *PaymentHandler {
 	return &PaymentHandler{
-		repository:         repo,
-		ticketUsageHandler: ticketUsageHandler,
+		repository:          repo,
+		ticketUsageHandler:  ticketUsageHandler,
+		bookingHandler:      bookingHandler,
+		activityLogHandler:  activityLogHandler,
+		notificationHandler: notificationHandler,
 	}
 }
 
@@ -66,6 +79,22 @@ func (h *PaymentHandler) CreateOne(ctx *gin.Context) {
 	_, err = h.ticketUsageHandler.repository.CreateOne(context.Background(), &ticketUsage)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create ticket usage"))
+		return
+	}
+	booking, err := h.bookingHandler.repository.GetOne(context.Background(), payment.BookingID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch booking"))
+		return
+	}
+
+	activityLog := entity.ActivityLog{
+		UserID:      booking.UserID,
+		Description: fmt.Sprintf("Booking id %d status %s payment successfully", booking.ID, booking.BookingStatus),
+	}
+
+	_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
 		return
 	}
 
