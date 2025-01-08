@@ -11,6 +11,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var responseBookingName = "booking"
+var responseBooking helper.ResponseMessage
+
 type BookingHandler struct {
 	repositoryBooking      entity.BookingRepository
 	scheduleRepository     entity.ScheduleRepository
@@ -39,49 +42,49 @@ func NewBookingHandler(
 func (h *BookingHandler) GetMany(ctx *gin.Context) {
 	bookings, err := h.repositoryBooking.GetMany(context.Background())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch bookings"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.GetFailed(responseBookingName)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Fetch data bookings successfully", bookings))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseBooking.GetSuccessfully(responseBookingName), bookings))
 }
 
 func (h *BookingHandler) GetOne(ctx *gin.Context) {
 	bookingId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid booking ID Not Found"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseBooking.IdFailed(responseBookingName)))
 		return
 	}
 
 	booking, err := h.repositoryBooking.GetOne(context.Background(), uint(bookingId))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch booking"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.GetFailed(responseBookingName)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Fetch data booking successfully", booking))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseBooking.GetSuccessfully(responseBookingName), booking))
 }
 
 func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 	var booking entity.Booking
 	if err := ctx.ShouldBindJSON(&booking); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseBooking.RequestFailed(responseBookingName)))
 		return
 	}
 
 	schedule, err := h.scheduleRepository.GetOne(context.Background(), booking.ScheduleID)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Schedule not found"})
+		ctx.JSON(http.StatusNotFound, helper.FailedResponse(responseBooking.GetFailed("schedule")))
 		return
 	}
 
 	if schedule.TicketPrice == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Ticket price cannot be zero"})
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Ticket price cannot be zero"))
 		return
 	}
 
 	if len(booking.SeatNumbers) == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "At least one seat must be selected"})
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("At least one seat must be selected"))
 		return
 	}
 
@@ -104,13 +107,13 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 	booking.TotalAmount = schedule.TicketPrice * float64(len(booking.SeatNumbers))
 
 	if booking.TotalAmount <= 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Total amount must be greater than zero"})
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Total amount must be greater than zero"))
 		return
 	}
 
 	createdBooking, err := h.repositoryBooking.CreateOne(context.Background(), &booking)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create booking"})
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.CreateFailed(responseBookingName)))
 		return
 	}
 
@@ -123,7 +126,7 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 	_, err = h.scheduleRepository.UpdateSeatsStatus(context.Background(), scheduleId, seatsData)
 	if err != nil {
 		h.repositoryBooking.DeleteOne(context.Background(), createdBooking.ID)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update schedule"})
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.UpdateFailed("schedule")))
 		return
 	}
 
@@ -133,7 +136,7 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 	}
 	_, err = h.activityLogRepository.CreateOne(context.Background(), &activityLog)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.CreateFailed("activity log")))
 		return
 	}
 
@@ -144,22 +147,22 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 
 	_, err = h.notificationRepository.CreateOne(context.Background(), &notification)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create notification"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.CreateFailed("notification")))
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, helper.SuccessResponse("Booking created successfully", createdBooking))
+	ctx.JSON(http.StatusCreated, helper.SuccessResponse(responseBooking.CreateSuccessfully(responseBookingName), createdBooking))
 }
 func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 	bookingId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid booking ID Not Found"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseBooking.IdFailed(responseBookingName)))
 		return
 	}
 
 	booking, err := h.repositoryBooking.GetOne(context.Background(), uint(bookingId))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch booking"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.GetFailed(responseBookingName)))
 		return
 	}
 
@@ -172,7 +175,7 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 
 		_, err = h.activityLogRepository.CreateOne(context.Background(), &activityLog)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.CreateFailed("activity log")))
 			return
 		}
 	case "cancel":
@@ -183,7 +186,7 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 
 		_, err = h.activityLogRepository.CreateOne(context.Background(), &activityLog)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.CreateFailed("activity log")))
 			return
 		}
 	case "payment":
@@ -195,18 +198,13 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 
 		_, err = h.activityLogRepository.CreateOne(context.Background(), &activityLog)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.CreateFailed("activity log")))
 			return
 		}
-	default:
 	}
 	var updateData entity.Booking
 	if err := ctx.ShouldBindJSON(&updateData); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid request payload"))
-		return
-	}
-	if updateData.BookingStatus == "" {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Booking status is required"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseBooking.RequestFailed(responseBookingName)))
 		return
 	}
 	updateFields := map[string]interface{}{
@@ -221,7 +219,7 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 	}
 	updatedBooking, err := h.repositoryBooking.UpdateOne(context.Background(), uint(bookingId), updateFields)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to update booking"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.UpdateFailed(responseBookingName)))
 		return
 	}
 	if updateData.BookingStatus == "cancel" {
@@ -231,7 +229,7 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 		}
 		_, err := h.cancellationRepository.CreateOne(context.Background(), &cancellation)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create cancellation"))
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.CreateFailed("cancellation")))
 			return
 		}
 		var seatsData = make(map[int]interface{})
@@ -240,28 +238,28 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 		}
 		schedule, err := h.scheduleRepository.GetOne(context.Background(), booking.ScheduleID)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, helper.FailedResponse("Schedule not found"))
+			ctx.JSON(http.StatusNotFound, helper.FailedResponse(responseBooking.GetFailed("schedule")))
 			return
 		}
 		_, err = h.scheduleRepository.UpdateSeatsStatus(context.Background(), schedule.ID, seatsData)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to update schedule"))
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.UpdateFailed(responseBookingName)))
 			return
 		}
 	}
 
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Update data booking successfully", updatedBooking))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseBooking.UpdateSuccessfully(responseBookingName), updatedBooking))
 }
 
 func (h *BookingHandler) DeleteOne(ctx *gin.Context) {
 	bookingId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid booking ID Not Found"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseBooking.IdFailed(responseBookingName)))
 		return
 	}
 	booking, err := h.repositoryBooking.GetOne(context.Background(), uint(bookingId))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch booking"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.GetFailed(responseBookingName)))
 		return
 	}
 	if booking.BookingStatus == "pending" {
@@ -271,18 +269,18 @@ func (h *BookingHandler) DeleteOne(ctx *gin.Context) {
 		}
 		schedule, err := h.scheduleRepository.GetOne(context.Background(), booking.ScheduleID)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, helper.FailedResponse("Schedule not found"))
+			ctx.JSON(http.StatusNotFound, helper.FailedResponse(responseBooking.IdFailed("schedule")))
 			return
 		}
 		_, err = h.scheduleRepository.UpdateSeatsStatus(context.Background(), schedule.ID, seatsData)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to update schedule"))
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.GetFailed("schedule")))
 			return
 		}
 	}
 	err = h.repositoryBooking.DeleteOne(context.Background(), uint(bookingId))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to delete booking"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.DeleteFailed(responseBookingName)))
 		return
 	}
 	activityLog := entity.ActivityLog{
@@ -292,8 +290,8 @@ func (h *BookingHandler) DeleteOne(ctx *gin.Context) {
 
 	_, err = h.activityLogRepository.CreateOne(context.Background(), &activityLog)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.CreateFailed("activity log")))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Delete data booking successfully", nil))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseBooking.DeleteSuccessfully(responseBookingName), nil))
 }
