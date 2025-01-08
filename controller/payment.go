@@ -67,7 +67,7 @@ func (h *PaymentHandler) CreateOne(ctx *gin.Context) {
 		return
 	}
 
-	booking, err := h.bookingHandler.repository.GetOne(context.Background(), payment.BookingID)
+	booking, err := h.bookingHandler.repositoryBooking.GetOne(context.Background(), payment.BookingID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch booking"))
 		return
