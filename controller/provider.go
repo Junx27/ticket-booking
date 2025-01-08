@@ -26,7 +26,7 @@ func NewProviderHandler(repo entity.ProviderRepository) *ProviderHandler {
 func (h *ProviderHandler) GetMany(ctx *gin.Context) {
 	providers, err := h.repository.GetMany(context.Background())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseProvider.GetFailed(responseProviderName)))
+		ctx.JSON(http.StatusNotFound, helper.FailedResponse(responseProvider.GetFailed(responseProviderName)))
 		return
 	}
 
