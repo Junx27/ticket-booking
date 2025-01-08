@@ -55,6 +55,7 @@ func (r *ProviderRepository) UpdateOne(ctx context.Context, providerId uint, upd
 }
 
 func (r *ProviderRepository) DeleteOne(ctx context.Context, providerId uint) error {
+
 	provider := &entity.Provider{}
 	res := r.db.Model(&provider).Where("id = ?", providerId).Delete(&provider)
 
