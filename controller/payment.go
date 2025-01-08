@@ -11,81 +11,84 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var responsePaymentName = "payment"
+var responsePayment helper.ResponseMessage
+
 type PaymentHandler struct {
-	repository          entity.PaymentRepository
-	ticketUsageHandler  *TicketUsageHanlder
-	bookingHandler      *BookingHandler
-	activityLogHandler  *ActivityLogHandler
-	notificationHandler *NotificationHandler
+	paymentRepository      entity.PaymentRepository
+	ticketUsageRepositiry  entity.TicketUsageRepository
+	bookingRepository      entity.BookingRepository
+	activityLogRepository  entity.ActivityLogRepository
+	notificationRepository entity.NotificationRepository
 }
 
 func NewPaymentHandler(
-	repo entity.PaymentRepository,
-	ticketUsageHandler *TicketUsageHanlder,
-	bookingHandler *BookingHandler,
-	activityLogHandler *ActivityLogHandler,
-	notificationHandler *NotificationHandler,
+	paymentRepository entity.PaymentRepository,
+	ticketUsageRepositiry entity.TicketUsageRepository,
+	bookingRepository entity.BookingRepository,
+	activityLogRepository entity.ActivityLogRepository,
+	notificationRepository entity.NotificationRepository,
 ) *PaymentHandler {
 	return &PaymentHandler{
-		repository:          repo,
-		ticketUsageHandler:  ticketUsageHandler,
-		bookingHandler:      bookingHandler,
-		activityLogHandler:  activityLogHandler,
-		notificationHandler: notificationHandler,
+		paymentRepository:      paymentRepository,
+		ticketUsageRepositiry:  ticketUsageRepositiry,
+		bookingRepository:      bookingRepository,
+		activityLogRepository:  activityLogRepository,
+		notificationRepository: notificationRepository,
 	}
 }
 
 func (h *PaymentHandler) GetMany(ctx *gin.Context) {
-	payments, err := h.repository.GetMany(context.Background())
+	payments, err := h.paymentRepository.GetMany(context.Background())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch payments"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.GetFailed(responsePaymentName)))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Fetch data payments successfully", payments))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responsePayment.GetSuccessfully(responsePaymentName), payments))
 }
 
 func (h *PaymentHandler) GetOne(ctx *gin.Context) {
 	paymentId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid payment ID"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responsePayment.IdFailed(responsePaymentName)))
 		return
 	}
 
-	payment, err := h.repository.GetOne(context.Background(), uint(paymentId))
+	payment, err := h.paymentRepository.GetOne(context.Background(), uint(paymentId))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch payment"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.GetFailed(responsePaymentName)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Fetch data payment successfully", payment))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responsePayment.GetSuccessfully(responsePaymentName), payment))
 }
 
 func (h *PaymentHandler) CreateOne(ctx *gin.Context) {
 	var payment entity.Payment
 	if err := ctx.ShouldBindJSON(&payment); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid request payload"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responsePayment.RequestFailed(responsePaymentName)))
 		return
 	}
 
-	booking, err := h.bookingHandler.repositoryBooking.GetOne(context.Background(), payment.BookingID)
+	booking, err := h.bookingRepository.GetOne(context.Background(), payment.BookingID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch booking"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.GetFailed("booking")))
 		return
 	}
 
 	payment.PaymentAmount = booking.TotalAmount
-	createdPayment, err := h.repository.CreateOne(context.Background(), &payment)
+	createdPayment, err := h.paymentRepository.CreateOne(context.Background(), &payment)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create payment"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.CreateFailed(responsePaymentName)))
 		return
 	}
 
 	ticketUsage := entity.TicketUsage{
 		BookingID: payment.BookingID,
 	}
-	_, err = h.ticketUsageHandler.repository.CreateOne(context.Background(), &ticketUsage)
+	_, err = h.ticketUsageRepositiry.CreateOne(context.Background(), &ticketUsage)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create ticket usage"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.CreateFailed("ticket usage")))
 		return
 	}
 
@@ -94,9 +97,9 @@ func (h *PaymentHandler) CreateOne(ctx *gin.Context) {
 		Description: fmt.Sprintf("Booking id %d status %s payment successfully", booking.ID, booking.BookingStatus),
 	}
 
-	_, err = h.activityLogHandler.repository.CreateOne(context.Background(), &activityLog)
+	_, err = h.activityLogRepository.CreateOne(context.Background(), &activityLog)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create activity log"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.CreateFailed("activity log")))
 		return
 	}
 	notification := entity.Notification{
@@ -104,49 +107,63 @@ func (h *PaymentHandler) CreateOne(ctx *gin.Context) {
 		Message: fmt.Sprintf("Booking id %d status %s payment completed", booking.ID, booking.BookingStatus),
 	}
 
-	_, err = h.notificationHandler.repository.CreateOne(context.Background(), &notification)
+	_, err = h.notificationRepository.CreateOne(context.Background(), &notification)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create notification"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.CreateFailed("notification")))
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, helper.SuccessResponse("Create data payment successfully", createdPayment))
+	ctx.JSON(http.StatusCreated, helper.SuccessResponse(responsePayment.CreateSuccessfully(responsePaymentName), createdPayment))
 }
 
 func (h *PaymentHandler) UpdateOne(ctx *gin.Context) {
 	paymentId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid payment ID"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responsePayment.IdFailed(responsePaymentName)))
 		return
 	}
 
-	var updateData map[string]interface{}
-	if err := ctx.ShouldBindJSON(&updateData); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid request payload"))
-		return
-	}
-
-	updatedPayment, err := h.repository.UpdateOne(context.Background(), uint(paymentId), updateData)
+	payment, err := h.paymentRepository.GetOne(context.Background(), uint(paymentId))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to update payment"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.GetFailed(responsePaymentName)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Update data payment successfully", updatedPayment))
+	var updateData entity.Payment
+	if err := ctx.ShouldBindJSON(&updateData); err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responsePayment.RequestFailed(responsePaymentName)))
+		return
+	}
+
+	updateFields := map[string]interface{}{
+		"id":             payment.ID,
+		"booking_id":     payment.BookingID,
+		"payment_amount": payment.PaymentAmount,
+		"payment_status": updateData.PaymentStatus,
+		"payment_method": payment.PaymentMethod,
+	}
+
+	updatedPayment, err := h.paymentRepository.UpdateOne(context.Background(), uint(paymentId), updateFields)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.UpdateFailed(responsePaymentName)))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responsePayment.UpdateSuccessfully(responsePaymentName), updatedPayment))
 }
 
 func (h *PaymentHandler) DeleteOne(ctx *gin.Context) {
 	paymentId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid payment ID"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responsePayment.IdFailed(responsePaymentName)))
 		return
 	}
 
-	err = h.repository.DeleteOne(context.Background(), uint(paymentId))
+	err = h.paymentRepository.DeleteOne(context.Background(), uint(paymentId))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to delete payment"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.DeleteFailed(responsePaymentName)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Delete data payment successfully", nil))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responsePayment.DeleteSuccessfully(responsePaymentName), nil))
 }

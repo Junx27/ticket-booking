@@ -13,13 +13,7 @@ func SetupPaymentRouter(r *gin.Engine, db *gorm.DB) {
 	notificationRepository := repository.NewNotificationRepository(db)
 	activityLogRepository := repository.NewActivityLogRepository(db)
 	bookingRepository := repository.NewBookingRepository(db)
-	cancellationRepository := repository.NewCancellationRepository(db)
-	scheduleRepository := repository.NewScheduleRepository(db)
-	ticketUsageHandler := controller.NewTicketUsageHandler(ticketUsageRepository)
-	activityLogHandler := controller.NewActivityLogHandler(activityLogRepository)
-	notificationHandler := controller.NewNotificationHandler(notificationRepository)
-	bookingHandler := controller.NewBookingHandler(bookingRepository, scheduleRepository, activityLogRepository, cancellationRepository, notificationRepository)
-	paymentHandler := controller.NewPaymentHandler(paymentRepository, ticketUsageHandler, bookingHandler, activityLogHandler, notificationHandler)
+	paymentHandler := controller.NewPaymentHandler(paymentRepository, ticketUsageRepository, bookingRepository, activityLogRepository, notificationRepository)
 
 	paymentGroup := r.Group("/payments")
 	{
