@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/Junx27/ticket-booking/controller"
+	"github.com/Junx27/ticket-booking/middleware"
 	"github.com/Junx27/ticket-booking/repository"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -13,6 +14,7 @@ func SetupUserRouter(r *gin.Engine, db *gorm.DB) {
 	userHandler := controller.NewUserHandler(userRepository)
 
 	userGroup := r.Group("/users")
+	userGroup.Use(middleware.AuthProtected(db))
 	{
 		userGroup.GET("/", userHandler.GetMany)
 		userGroup.GET("/:id", userHandler.GetOne)
