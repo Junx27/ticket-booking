@@ -1,5 +1,11 @@
 # TICKET BOOKING
 
+## Docker Image on Development
+
+```bash
+docker pull trisaptono123/ticket-booking-app:2024.1.7
+```
+
 ## Set Up Project
 
 ```bash
