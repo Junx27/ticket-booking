@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
@@ -91,4 +92,71 @@ func AuthProtected(db *gorm.DB) gin.HandlerFunc {
 		ctx.Set("userId", userId)
 		ctx.Next()
 	}
+}
+
+func RoleRequired(allowedRoles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString, err := c.Cookie("token")
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"status":  "fail",
+				"message": "Authorization token is missing",
+			})
+			c.Abort()
+			return
+		}
+		token, err := jwt.ParseWithClaims(tokenString, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
+
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method")
+			}
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"status":  "fail",
+				"message": "Invalid token",
+			})
+			c.Abort()
+			return
+		}
+		claims, ok := token.Claims.(*jwt.MapClaims)
+		if !ok || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"status":  "fail",
+				"message": "Invalid token claims",
+			})
+			c.Abort()
+			return
+		}
+
+		role, ok := (*claims)["role"].(string)
+		if !ok || role == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"status":  "fail",
+				"message": "Role is missing or invalid in token",
+			})
+			c.Abort()
+			return
+		}
+		if !isRoleAllowed(role, allowedRoles) {
+			c.JSON(http.StatusForbidden, gin.H{
+				"status":  "fail",
+				"message": "You do not have permission to access this resource",
+			})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func isRoleAllowed(role string, allowedRoles []string) bool {
+	for _, allowedRole := range allowedRoles {
+		if role == allowedRole {
+			return true
+		}
+	}
+	return false
 }
