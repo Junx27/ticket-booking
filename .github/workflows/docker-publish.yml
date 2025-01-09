@@ -39,21 +39,9 @@ jobs:
       - name: Deploy Docker container on Ubuntu Server
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.UBUNTU_SERVER_IP }} <<EOF
-            # Navigate to the application directory
             cd /home/ubuntu/my-app
-            
-            # Optionally, pull latest code (if necessary)
             git pull origin main
-
-            # Stop any running container using the same image (if needed)
             docker-compose down
-
-            # Pull the latest image from Docker Hub
             docker pull ${{ secrets.DOCKER_USERNAME }}/ticket-booking-app:2024.1.7
-
-            # Start the container with Docker Compose (or using docker run)
-            docker-compose up -d  # Or: docker run -d ${{ secrets.DOCKER_USERNAME }}/ticket-booking-app:2024.1.7
-
-            # If using Docker Compose, you can also restart services like so:
-            # docker-compose restart
+            docker-compose up -d
           EOF
