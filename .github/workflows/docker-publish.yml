@@ -33,10 +33,13 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/ticket-booking-app:2024.1.7
 
-      - name: Set up SSH key
-        uses: docker/setup-ssh@v1
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Set up SSH key (Manual Setup)
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.UBUNTU_SERVER_IP }} >> ~/.ssh/known_hosts
+          cat ~/.ssh/known_hosts
 
       - name: Debug SSH connection to Ubuntu server
         run: |
