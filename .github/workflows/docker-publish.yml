@@ -33,8 +33,8 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/ticket-booking-app:2024.1.7
 
-      - name: Set up SSH key for Ubuntu server
-        uses: actions/setup-ssh@v2
+      - name: Set up SSH key
+        uses: docker/setup-ssh@v1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
