@@ -2,9 +2,11 @@ package controller
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/Junx27/ticket-booking/entity"
+	"github.com/Junx27/ticket-booking/helper"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -44,7 +46,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, user, err := h.service.Login(ctxTimeout, creds)
+	token, _, err := h.service.Login(ctxTimeout, creds)
 
 	if err != nil {
 		ctx.JSON(400, gin.H{
@@ -53,19 +55,12 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		})
 		return
 	}
-
-	ctx.JSON(200, gin.H{
-		"status":  "success",
-		"message": "Successfully logged in",
-		"data": gin.H{
-			"token": token,
-			"user":  user,
-		},
-	})
+	ctx.SetCookie("token", token, 3600*24*1, "/", "", false, true)
+	ctx.JSON(http.StatusOK, helper.AuthResponse("Login successfully", token))
 }
 
 func (h *AuthHandler) Register(ctx *gin.Context) {
-	creds := &entity.AuthCredentials{}
+	creds := &entity.User{}
 
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -86,7 +81,8 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	token, user, err := h.service.Register(ctxTimeout, creds)
+	token, _, err := h.service.Register(ctxTimeout, creds)
+	ctx.SetCookie("token", token, 3600*24*1, "/", "", false, true)
 
 	if err != nil {
 		ctx.JSON(400, gin.H{
@@ -96,38 +92,10 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(201, gin.H{
-		"status":  "success",
-		"message": "Successfully registered",
-		"data": gin.H{
-			"token": token,
-			"user":  user,
-		},
-	})
+	ctx.JSON(http.StatusCreated, helper.AuthResponse("Register successfully", token))
 }
 
 func (h *AuthHandler) Logout(ctx *gin.Context) {
-	token := ctx.GetHeader("Authorization")
-
-	if token == "" {
-		ctx.JSON(400, gin.H{
-			"status":  "fail",
-			"message": "Token is required",
-		})
-		return
-	}
-
-	err := h.service.Logout(ctx, token)
-	if err != nil {
-		ctx.JSON(400, gin.H{
-			"status":  "fail",
-			"message": "Logout failed: " + err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(200, gin.H{
-		"status":  "success",
-		"message": "Successfully logged out",
-	})
+	ctx.SetCookie("token", "", -1, "/", "", false, true)
+	ctx.JSON(http.StatusOK, helper.SuccessResponse("Logout successfully", nil))
 }

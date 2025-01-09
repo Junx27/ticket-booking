@@ -49,7 +49,6 @@ type UserWithRelation struct {
 type UserRepository interface {
 	GetMany(ctx context.Context) ([]*User, error)
 	GetOne(ctx context.Context, userId uint) (*UserWithRelation, error)
-	CreateOne(ctx context.Context, user *User) (*User, error)
 	UpdateOne(ctx context.Context, userId uint, updateData map[string]interface{}) (*User, error)
 	DeleteOne(ctx context.Context, userId uint) error
 }

@@ -46,22 +46,6 @@ func (h *UserHandler) GetOne(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.SuccessResponse("Fetch data user successfully", user))
 }
 
-func (h *UserHandler) CreateOne(ctx *gin.Context) {
-	var user entity.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid request payload"))
-		return
-	}
-
-	createdUser, err := h.repository.CreateOne(context.Background(), &user)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create user"))
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, helper.SuccessResponse("Create user successfully", createdUser))
-}
-
 func (h *UserHandler) UpdateOne(ctx *gin.Context) {
 	userId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
