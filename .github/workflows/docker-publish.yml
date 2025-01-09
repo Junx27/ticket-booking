@@ -24,7 +24,30 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/ticket-booking-app:2024.1.7
+        run: |
+          docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/ticket-booking-app:2024.1.7
+          docker images
+
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/ticket-booking-app:2024.1.7
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent-action@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Debug SSH connection to Ubuntu server
+        run: |
+          ssh -v -o StrictHostKeyChecking=no ubuntu@${{ secrets.UBUNTU_SERVER_IP }} "echo 'SSH connection successful!'"
+
+      - name: Deploy Docker container on Ubuntu Server
+        run: |
+          ssh -v -o StrictHostKeyChecking=no ubuntu@${{ secrets.UBUNTU_SERVER_IP }} <<EOF
+            cd /home/ubuntu/my-app
+            git pull origin main
+            docker-compose down
+            docker pull ${{ secrets.DOCKER_USERNAME }}/ticket-booking-app:2024.1.7
+            docker-compose up -d
+          EOF
