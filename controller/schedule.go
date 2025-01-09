@@ -3,12 +3,15 @@ package controller
 import (
 	"context"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/Junx27/ticket-booking/entity"
 	"github.com/Junx27/ticket-booking/helper"
 	"github.com/gin-gonic/gin"
 )
+
+var secretKey = os.Getenv("JWT_SECRET")
 
 type ScheduleHandler struct {
 	repository entity.ScheduleRepository
@@ -44,20 +47,26 @@ func (h *ScheduleHandler) GetOne(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, helper.SuccessResponse("Fetch data schedule successfully", schedule))
 }
-
 func (h *ScheduleHandler) CreateOne(ctx *gin.Context) {
 	var schedule entity.Schedule
 	if err := ctx.ShouldBindJSON(&schedule); err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid request payload"))
 		return
 	}
-
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+		return
+	}
+	schedule.UserID = userID
 	createdSchedule, err := h.repository.CreateOne(context.Background(), &schedule)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create schedule"))
 		return
 	}
-
 	ctx.JSON(http.StatusOK, helper.SuccessResponse("Create schedule successfully", createdSchedule))
 }
 
