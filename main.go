@@ -3,7 +3,9 @@ package main
 import (
 	"github.com/Junx27/ticket-booking/config"
 	"github.com/Junx27/ticket-booking/database"
+	"github.com/Junx27/ticket-booking/repository"
 	"github.com/Junx27/ticket-booking/router"
+	"github.com/Junx27/ticket-booking/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,6 +18,10 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
+
+	authRepository := repository.NewAuthRepository(db)
+	authService := service.NewAuthService(authRepository)
+	router.SetupAuthRouter(r, authService.(*service.AuthService))
 	router.SetupUserRouter(r, db)
 	router.SetupProviderRouter(r, db)
 	router.SetupScheduleRouter(r, db)
