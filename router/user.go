@@ -16,7 +16,6 @@ func SetupUserRouter(r *gin.Engine, db *gorm.DB) {
 	{
 		userGroup.GET("/", userHandler.GetMany)
 		userGroup.GET("/:id", userHandler.GetOne)
-		userGroup.POST("/", userHandler.CreateOne)
 		userGroup.PUT("/:id", userHandler.UpdateOne)
 		userGroup.DELETE("/:id", userHandler.DeleteOne)
 	}

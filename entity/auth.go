@@ -13,13 +13,13 @@ type AuthCredentials struct {
 }
 
 type AuthRepository interface {
-	RegisterUser(ctx context.Context, registerData *AuthCredentials) (*User, error)
+	RegisterUser(ctx context.Context, registerData *User) (*User, error)
 	GetUser(ctx context.Context, query interface{}, args ...interface{}) (*User, error)
 }
 
 type AuthService interface {
 	Login(ctx context.Context, loginData *AuthCredentials) (string, *User, error)
-	Register(ctx context.Context, registerData *AuthCredentials) (string, *User, error)
+	Register(ctx context.Context, registerData *User) (string, *User, error)
 	Logout(ctx context.Context, token string) error
 }
 

@@ -11,10 +11,13 @@ type AuthRepository struct {
 	db *gorm.DB
 }
 
-func (r *AuthRepository) RegisterUser(ctx context.Context, registerData *entity.AuthCredentials) (*entity.User, error) {
+func (r *AuthRepository) RegisterUser(ctx context.Context, registerData *entity.User) (*entity.User, error) {
 	user := &entity.User{
-		Email:    registerData.Email,
-		Password: registerData.Password,
+		Email:       registerData.Email,
+		Password:    registerData.Password,
+		FirstName:   registerData.FirstName,
+		LastName:    registerData.LastName,
+		PhoneNumber: registerData.PhoneNumber,
 	}
 
 	res := r.db.Model(&entity.User{}).Create(user)

@@ -35,7 +35,7 @@ func (s *AuthService) Login(ctx context.Context, loginData *entity.AuthCredentia
 	claims := jwt.MapClaims{
 		"id":   user.ID,
 		"role": user.Role,
-		"exp":  time.Now().Add(time.Hour * 168).Unix(),
+		"exp":  time.Now().Add(time.Second * 86400).Unix(),
 	}
 
 	token, err := util.GenerateJWT(claims, jwt.SigningMethodHS256, os.Getenv("JWT_SECRET"))
@@ -47,7 +47,7 @@ func (s *AuthService) Login(ctx context.Context, loginData *entity.AuthCredentia
 	return token, user, nil
 }
 
-func (s *AuthService) Register(ctx context.Context, registerData *entity.AuthCredentials) (string, *entity.User, error) {
+func (s *AuthService) Register(ctx context.Context, registerData *entity.User) (string, *entity.User, error) {
 	if !entity.IsValidEmail(registerData.Email) {
 		return "", nil, fmt.Errorf("please, provide a valid email to register")
 	}
@@ -71,7 +71,7 @@ func (s *AuthService) Register(ctx context.Context, registerData *entity.AuthCre
 	claims := jwt.MapClaims{
 		"id":   user.ID,
 		"role": user.Role,
-		"exp":  time.Now().Add(time.Hour * 168).Unix(),
+		"exp":  time.Now().Add(time.Second * 86400).Unix(),
 	}
 	token, err := util.GenerateJWT(claims, jwt.SigningMethodHS256, os.Getenv("JWT_SECRET"))
 	if err != nil {

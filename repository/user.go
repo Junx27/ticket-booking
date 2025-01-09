@@ -35,13 +35,6 @@ func (r *UserRespository) GetOne(ctx context.Context, userId uint) (*entity.User
 	return user, nil
 }
 
-func (r *UserRespository) CreateOne(ctx context.Context, user *entity.User) (*entity.User, error) {
-	if err := r.db.WithContext(ctx).Create(user).Error; err != nil {
-		return nil, err
-	}
-	return user, nil
-}
-
 func (r *UserRespository) UpdateOne(ctx context.Context, userId uint, updateData map[string]interface{}) (*entity.User, error) {
 	user := &entity.User{}
 	res := r.db.Model(&user).Where("id = ?", userId).Updates(updateData)
