@@ -1,7 +1,8 @@
+version: "3.8"
+
 services:
   app:
-    build:
-      context: .
+    image: trisaptono123/ticket-booking-app:2024.1.7
     container_name: ticket-booking
     ports:
       - "8080:8080"
@@ -11,6 +12,7 @@ services:
       - .env
     depends_on:
       - database
+    entrypoint: ["go", "run", "main.go"]
     networks:
       - ticket_network
 
@@ -19,7 +21,6 @@ services:
     container_name: ticket_postgres
     restart: always
     environment:
-      POSTGRES_HOST: ${DB_HOST}
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -36,3 +37,4 @@ volumes:
 
 networks:
   ticket_network:
+    driver: bridge
