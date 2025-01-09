@@ -25,12 +25,10 @@ func (r *ProviderRepository) GetMany(ctx context.Context) ([]*entity.Provider, e
 	return providers, nil
 }
 
-func (r *ProviderRepository) GetOne(ctx context.Context, providerId uint) (*entity.Provider, error) {
-	provider := &entity.Provider{}
-	res := r.db.Model(&provider).Where("id = ?", providerId).First(&provider)
-
-	if res.Error != nil {
-		return nil, res.Error
+func (r *ProviderRepository) GetOne(ctx context.Context, providerId uint) (*entity.ProviderWithRelation, error) {
+	provider := &entity.ProviderWithRelation{}
+	if err := r.db.WithContext(ctx).Preload("Schedules").Where("id = ?", providerId).First(&provider).Error; err != nil {
+		return nil, err
 	}
 
 	return provider, nil

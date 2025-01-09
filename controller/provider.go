@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -14,19 +15,21 @@ var responseProviderName = "provider"
 var responseProvider helper.ResponseMessage
 
 type ProviderHandler struct {
-	repository entity.ProviderRepository
+	repositoryProvider    entity.ProviderRepository
+	repositoryActivityLog entity.ActivityLogRepository
 }
 
-func NewProviderHandler(repo entity.ProviderRepository) *ProviderHandler {
+func NewProviderHandler(repositoryProvider entity.ProviderRepository, repositoryActivityLog entity.ActivityLogRepository) *ProviderHandler {
 	return &ProviderHandler{
-		repository: repo,
+		repositoryProvider:    repositoryProvider,
+		repositoryActivityLog: repositoryActivityLog,
 	}
 }
 
 func (h *ProviderHandler) GetMany(ctx *gin.Context) {
-	providers, err := h.repository.GetMany(context.Background())
+	providers, err := h.repositoryProvider.GetMany(context.Background())
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, helper.FailedResponse(responseProvider.GetFailed(responseProviderName)))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseProvider.GetFailed(responseProviderName)))
 		return
 	}
 
@@ -36,13 +39,13 @@ func (h *ProviderHandler) GetMany(ctx *gin.Context) {
 func (h *ProviderHandler) GetOne(ctx *gin.Context) {
 	providerId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseProvider.IdFailed(responseProviderName)))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseProvider.GetFailed(responseProviderName)))
 		return
 	}
 
-	provider, err := h.repository.GetOne(context.Background(), uint(providerId))
+	provider, err := h.repositoryProvider.GetOne(context.Background(), uint(providerId))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseProvider.GetFailed(responseProviderName)))
+		ctx.JSON(http.StatusNotFound, helper.FailedResponse(responseProvider.NotFound(responseProviderName)))
 		return
 	}
 
@@ -55,9 +58,19 @@ func (h *ProviderHandler) CreateOne(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseProvider.RequestFailed(responseProviderName)))
 		return
 	}
-	createProvider, err := h.repository.CreateOne(context.Background(), &provider)
+	createProvider, err := h.repositoryProvider.CreateOne(context.Background(), &provider)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseProvider.CreateFailed(responseProviderName)))
+		return
+	}
+	activityLog := entity.ActivityLog{
+		UserID:      provider.ID,
+		Description: fmt.Sprintf("Provider create by user id %d successfully", provider.ID),
+	}
+
+	_, err = h.repositoryActivityLog.CreateOne(context.Background(), &activityLog)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.CreateFailed("activity log")))
 		return
 	}
 
@@ -71,18 +84,24 @@ func (h *ProviderHandler) UpdateOne(ctx *gin.Context) {
 		return
 	}
 
-	_, err = h.repository.GetOne(context.Background(), uint(providerId))
+	provider, err := h.repositoryProvider.GetOne(context.Background(), uint(providerId))
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, helper.FailedResponse("Not found"))
+		ctx.JSON(http.StatusNotFound, helper.FailedResponse(responseProvider.NotFound(responseProviderName)))
 		return
 	}
 
-	var updateData map[string]interface{}
+	var updateData entity.Provider
 	if err := ctx.ShouldBindJSON(&updateData); err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseProvider.RequestFailed(responseProviderName)))
 		return
 	}
-	updateProvider, err := h.repository.UpdateOne(context.Background(), uint(providerId), updateData)
+	updateFields := map[string]interface{}{
+		"id":           provider.ID,
+		"name":         updateData.Name,
+		"description":  updateData.Description,
+		"contact_info": updateData.ContactInfo,
+	}
+	updateProvider, err := h.repositoryProvider.UpdateOne(context.Background(), uint(providerId), updateFields)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseProvider.UpdateFailed(responseProviderName)))
 		return
@@ -98,13 +117,13 @@ func (h *ProviderHandler) DeleteOne(ctx *gin.Context) {
 		return
 	}
 
-	_, err = h.repository.GetOne(context.Background(), uint(providerId))
+	_, err = h.repositoryProvider.GetOne(context.Background(), uint(providerId))
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, helper.FailedResponse("Not found"))
+		ctx.JSON(http.StatusNotFound, helper.FailedResponse(responseProvider.NotFound(responseProviderName)))
 		return
 	}
 
-	err = h.repository.DeleteOne(context.Background(), uint(providerId))
+	err = h.repositoryProvider.DeleteOne(context.Background(), uint(providerId))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseProvider.DeleteFailed(responseProviderName)))
 		return

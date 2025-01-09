@@ -1,10 +1,13 @@
 package helper
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Response struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message,omitempty"`
+	Token   string      `json:"token,omitempty"`
 	Data    interface{} `json:"data,omitempty"`
 }
 
@@ -19,6 +22,14 @@ func SuccessResponse(message string, data any) Response {
 func FailedResponse(message string) Response {
 	return Response{
 		Message: message,
+	}
+}
+
+func AuthResponse(message, token string) Response {
+	return Response{
+		Success: true,
+		Message: message,
+		Token:   token,
 	}
 }
 
@@ -62,4 +73,7 @@ func (ResponseMessage) DeleteFailed(name string) string {
 
 func (ResponseMessage) RequestFailed(name string) string {
 	return fmt.Sprintf("Invalid %s request payload", name)
+}
+func (ResponseMessage) NotFound(name string) string {
+	return fmt.Sprintf("Fetch %s not found", name)
 }
