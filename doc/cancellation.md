@@ -1,5 +1,7 @@
 # How to test cancellation feature
 
+Cancellation is a menu used to cancel a ticket booking by the customer.
+
 ```
 create provider --> create schedule --> create booking --> create cancellation
 ```
