@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/Junx27/ticket-booking/controller"
+	"github.com/Junx27/ticket-booking/middleware"
 	"github.com/Junx27/ticket-booking/repository"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -16,6 +17,7 @@ func SetupPaymentRouter(r *gin.Engine, db *gorm.DB) {
 	paymentHandler := controller.NewPaymentHandler(paymentRepository, ticketUsageRepository, bookingRepository, activityLogRepository, notificationRepository)
 
 	paymentGroup := r.Group("/payments")
+	paymentGroup.Use(middleware.AuthProtected(db))
 	{
 		paymentGroup.GET("/", paymentHandler.GetMany)
 		paymentGroup.GET("/:id", paymentHandler.GetOne)

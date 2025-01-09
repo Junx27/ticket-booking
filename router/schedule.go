@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/Junx27/ticket-booking/controller"
+	"github.com/Junx27/ticket-booking/middleware"
 	"github.com/Junx27/ticket-booking/repository"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -12,6 +13,7 @@ func SetupScheduleRouter(r *gin.Engine, db *gorm.DB) {
 	scheduleHandler := controller.NewScheduleHandler(scheduleRepository)
 
 	scheduleGroup := r.Group("/schedules")
+	scheduleGroup.Use(middleware.AuthProtected(db))
 	{
 		scheduleGroup.GET("/", scheduleHandler.GetMany)
 		scheduleGroup.GET("/:id", scheduleHandler.GetOne)
