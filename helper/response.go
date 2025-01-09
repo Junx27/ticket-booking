@@ -63,3 +63,6 @@ func (ResponseMessage) DeleteFailed(name string) string {
 func (ResponseMessage) RequestFailed(name string) string {
 	return fmt.Sprintf("Invalid %s request payload", name)
 }
+func (ResponseMessage) NotFound(name string) string {
+	return fmt.Sprintf("Fetch %s not found", name)
+}
