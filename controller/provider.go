@@ -58,14 +58,23 @@ func (h *ProviderHandler) CreateOne(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseProvider.RequestFailed(responseProviderName)))
 		return
 	}
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+		return
+	}
+	provider.UserID = userID
 	createProvider, err := h.repositoryProvider.CreateOne(context.Background(), &provider)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseProvider.CreateFailed(responseProviderName)))
 		return
 	}
 	activityLog := entity.ActivityLog{
-		UserID:      provider.ID,
-		Description: fmt.Sprintf("Provider create by user id %d successfully", provider.ID),
+		UserID:      provider.UserID,
+		Description: fmt.Sprintf("Provider create by user id %d successfully", provider.UserID),
 	}
 
 	_, err = h.repositoryActivityLog.CreateOne(context.Background(), &activityLog)
