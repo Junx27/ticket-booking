@@ -24,8 +24,6 @@ type Schedule struct {
 	ArrivalLocation   string        `json:"arrival_location" gorm:"not null"`
 	AvailableSeats    pq.Int64Array `json:"available_seats" gorm:"type:integer[]"`
 	TicketPrice       float64       `json:"ticket_price" gorm:"not null"`
-	CreatedAt         time.Time     `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
-	UpdatedAt         time.Time     `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
 }
 type ScheduleWithRelation struct {
 	BaseModelSchedule

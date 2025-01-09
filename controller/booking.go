@@ -62,13 +62,59 @@ func (h *BookingHandler) GetOne(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseBooking.GetSuccessfully(responseBookingName), booking))
+	response := &entity.BookingWithRelation{
+		ID:            booking.ID,
+		UserID:        booking.UserID,
+		ScheduleID:    booking.ScheduleID,
+		TicketCode:    booking.TicketCode,
+		TotalAmount:   booking.TotalAmount,
+		BookingStatus: booking.BookingStatus,
+		SeatNumbers:   booking.SeatNumbers,
+		CreatedAt:     booking.CreatedAt,
+		UpdatedAt:     booking.UpdatedAt,
+		User:          booking.User,
+		Schedule:      booking.Schedule,
+	}
+
+	if booking.Payment != nil && booking.Payment.ID != 0 {
+		response.Payment = booking.Payment
+	} else {
+		response.Payment = nil
+	}
+
+	if booking.Cancellation != nil && booking.Cancellation.ID != 0 {
+		response.Cancellation = booking.Cancellation
+	} else {
+		response.Cancellation = nil
+	}
+
+	if booking.TicketUsage != nil && booking.TicketUsage.ID != 0 {
+		response.TicketUsage = booking.TicketUsage
+	} else {
+		response.TicketUsage = nil
+	}
+
+	if booking.Refund != nil && booking.Refund.ID != 0 {
+		response.Refund = booking.Refund
+	} else {
+		response.Refund = nil
+	}
+
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseBooking.GetSuccessfully(responseBookingName), response))
 }
 
 func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 	var booking entity.Booking
 	if err := ctx.ShouldBindJSON(&booking); err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseBooking.RequestFailed(responseBookingName)))
+		return
+	}
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -102,8 +148,8 @@ func (h *BookingHandler) CreateOne(ctx *gin.Context) {
 		return
 	}
 
-	booking.TicketCode = helper.GenerateTicketNumber(booking.UserID, booking.ScheduleID)
-
+	booking.TicketCode = helper.GenerateTicketNumber(userID, booking.ScheduleID)
+	booking.UserID = userID
 	booking.TotalAmount = schedule.TicketPrice * float64(len(booking.SeatNumbers))
 
 	if booking.TotalAmount <= 0 {

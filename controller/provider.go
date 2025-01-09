@@ -92,6 +92,14 @@ func (h *ProviderHandler) UpdateOne(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseProvider.IdFailed(responseProviderName)))
 		return
 	}
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+		return
+	}
 
 	provider, err := h.repositoryProvider.GetOne(context.Background(), uint(providerId))
 	if err != nil {
@@ -106,6 +114,7 @@ func (h *ProviderHandler) UpdateOne(ctx *gin.Context) {
 	}
 	updateFields := map[string]interface{}{
 		"id":           provider.ID,
+		"user_id":      userID,
 		"name":         updateData.Name,
 		"description":  updateData.Description,
 		"contact_info": updateData.ContactInfo,
