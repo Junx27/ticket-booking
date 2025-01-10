@@ -17,8 +17,8 @@ func SetupScheduleRouter(r *gin.Engine, db *gorm.DB) {
 	{
 		scheduleGroup.GET("/", scheduleHandler.GetMany)
 		scheduleGroup.GET("/:id", scheduleHandler.GetOne)
-		scheduleGroup.POST("/", scheduleHandler.CreateOne)
-		scheduleGroup.PUT("/:id", scheduleHandler.UpdateOne)
-		scheduleGroup.DELETE("/:id", scheduleHandler.DeleteOne)
+		scheduleGroup.POST("/", middleware.RoleRequired("provider"), scheduleHandler.CreateOne)
+		scheduleGroup.PUT("/:id", middleware.RoleRequired("provider"), scheduleHandler.UpdateOne)
+		scheduleGroup.DELETE("/:id", middleware.RoleRequired("provider", "admin"), scheduleHandler.DeleteOne)
 	}
 }

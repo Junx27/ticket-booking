@@ -21,7 +21,7 @@ func SetupPaymentRouter(r *gin.Engine, db *gorm.DB) {
 	{
 		paymentGroup.GET("/", paymentHandler.GetMany)
 		paymentGroup.GET("/:id", paymentHandler.GetOne)
-		paymentGroup.POST("/", paymentHandler.CreateOne)
+		paymentGroup.POST("/", middleware.RoleRequired("customer"), paymentHandler.CreateOne)
 		paymentGroup.PUT("/:id", paymentHandler.UpdateOne)
 		paymentGroup.DELETE("/:id", paymentHandler.DeleteOne)
 	}

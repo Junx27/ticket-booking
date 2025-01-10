@@ -18,7 +18,7 @@ func SetupProviderRouter(r *gin.Engine, db *gorm.DB) {
 	{
 		providerGroup.GET("/", providerHandler.GetMany)
 		providerGroup.GET("/:id", providerHandler.GetOne)
-		providerGroup.POST("/", providerHandler.CreateOne)
+		providerGroup.POST("/", middleware.RoleRequired("provider"), providerHandler.CreateOne)
 		providerGroup.PUT("/:id", providerHandler.UpdateOne)
 		providerGroup.DELETE("/:id", providerHandler.DeleteOne)
 	}

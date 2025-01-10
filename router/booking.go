@@ -19,10 +19,10 @@ func SetupBookingRouter(r *gin.Engine, db *gorm.DB) {
 	bookingGroup := r.Group("/bookings")
 	bookingGroup.Use(middleware.AuthProtected(db))
 	{
-		bookingGroup.GET("/", middleware.RoleRequired("admin", "customer"), bookingHandler.GetMany)
+		bookingGroup.GET("/", bookingHandler.GetMany)
 		bookingGroup.GET("/:id", bookingHandler.GetOne)
-		bookingGroup.POST("/", bookingHandler.CreateOne)
-		bookingGroup.PUT("/:id", bookingHandler.UpdateOne)
+		bookingGroup.POST("/", middleware.RoleRequired("customer"), bookingHandler.CreateOne)
+		bookingGroup.PUT("/:id", middleware.RoleRequired("customer"), bookingHandler.UpdateOne)
 		bookingGroup.DELETE("/:id", bookingHandler.DeleteOne)
 	}
 }

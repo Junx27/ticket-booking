@@ -15,10 +15,10 @@ func SetupActivityLogRouter(r *gin.Engine, db *gorm.DB) {
 	activityLogGroup := r.Group("/activity-logs")
 	activityLogGroup.Use(middleware.AuthProtected(db))
 	{
-		activityLogGroup.GET("/", activityLogHandler.GetMany)
-		activityLogGroup.GET("/activity-log/:user_id", activityLogHandler.GetManyByUser)
-		activityLogGroup.GET("/:id", activityLogHandler.GetOne)
-		activityLogGroup.DELETE("/:id", activityLogHandler.DeleteOne)
-		activityLogGroup.DELETE("/", activityLogHandler.DeleteMany)
+		activityLogGroup.GET("/", middleware.RoleRequired("admin"), activityLogHandler.GetMany)
+		activityLogGroup.GET("/activity-log/:user_id", middleware.RoleRequired("admin"), activityLogHandler.GetManyByUser)
+		activityLogGroup.GET("/:id", middleware.RoleRequired("admin"), activityLogHandler.GetOne)
+		activityLogGroup.DELETE("/:id", middleware.RoleRequired("admin"), activityLogHandler.DeleteOne)
+		activityLogGroup.DELETE("/", middleware.RoleRequired("admin"), activityLogHandler.DeleteMany)
 	}
 }
