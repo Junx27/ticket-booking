@@ -14,8 +14,8 @@ func main() {
 	cfg := config.NewEnvConfig()
 
 	db := database.Init(cfg, database.DBMigrator)
-	database.SeedUsers(db)
-	gin.SetMode(gin.ReleaseMode)
+	// database.SeedUsers(db)
+	// gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
 

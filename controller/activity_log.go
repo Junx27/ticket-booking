@@ -10,6 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var responseActivityLogName = "activity log"
+var responseActivityLog helper.ResponseMessage
+
 type ActivityLogHandler struct {
 	repository entity.ActivityLogRepository
 }
@@ -23,10 +26,10 @@ func NewActivityLogHandler(repo entity.ActivityLogRepository) *ActivityLogHandle
 func (h *ActivityLogHandler) GetMany(ctx *gin.Context) {
 	activityLogs, err := h.repository.GetMany(context.Background())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch activity logs"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseActivityLog.GetFailed(responseActivityLogName)))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Fetch data activity logs successfully", activityLogs))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseActivityLog.GetSuccessfully(responseActivityLogName), activityLogs))
 }
 
 func (h *ActivityLogHandler) GetManyByUser(ctx *gin.Context) {
