@@ -6,6 +6,12 @@
 docker pull trisaptono123/ticket-booking-app:2024.1.7
 ```
 
+## Endpoint Production
+
+```bash
+http://103.150.116.253:8081
+```
+
 ## Set Up Project
 
 ```bash
