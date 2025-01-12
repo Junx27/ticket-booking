@@ -19,7 +19,7 @@ func SetupCancellationRouter(r *gin.Engine, db *gorm.DB) {
 		cancellationGroup.GET("/booking/:booking_id", cancellationHandler.GetManyByBookingID)
 		cancellationGroup.GET("/:id", cancellationHandler.GetOne)
 		cancellationGroup.POST("/", middleware.RoleRequired("customer"), cancellationHandler.CreateOne)
-		cancellationGroup.DELETE("/:id", cancellationHandler.DeleteOne)
-		cancellationGroup.DELETE("/", cancellationHandler.DeleteMany)
+		cancellationGroup.DELETE("/:id", middleware.RoleRequired("admin"), cancellationHandler.DeleteOne)
+		cancellationGroup.DELETE("/", middleware.RoleRequired("admin"), cancellationHandler.DeleteMany)
 	}
 }

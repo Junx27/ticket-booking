@@ -15,10 +15,10 @@ func SetupRefundRouter(r *gin.Engine, db *gorm.DB) {
 	refundGroup := r.Group("/refunds")
 	refundGroup.Use(middleware.AuthProtected(db))
 	{
-		refundGroup.GET("/", refundHandler.GetMany)
-		refundGroup.GET("/:id", refundHandler.GetOne)
-		refundGroup.POST("/", refundHandler.CreateOne)
-		refundGroup.PUT("/:id", refundHandler.UpdateOne)
-		refundGroup.DELETE("/:id", refundHandler.DeleteOne)
+		refundGroup.GET("/", middleware.RoleRequired("admin"), refundHandler.GetMany)
+		refundGroup.GET("/:id", middleware.RoleRequired("admin"), refundHandler.GetOne)
+		refundGroup.POST("/", middleware.RoleRequired("admin"), refundHandler.CreateOne)
+		refundGroup.PUT("/:id", middleware.RoleRequired("admin"), refundHandler.UpdateOne)
+		refundGroup.DELETE("/:id", middleware.RoleRequired("admin"), refundHandler.DeleteOne)
 	}
 }

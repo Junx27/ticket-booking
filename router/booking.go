@@ -23,6 +23,6 @@ func SetupBookingRouter(r *gin.Engine, db *gorm.DB) {
 		bookingGroup.GET("/:id", bookingHandler.GetOne)
 		bookingGroup.POST("/", middleware.RoleRequired("customer"), bookingHandler.CreateOne)
 		bookingGroup.PUT("/:id", middleware.RoleRequired("customer"), bookingHandler.UpdateOne)
-		bookingGroup.DELETE("/:id", bookingHandler.DeleteOne)
+		bookingGroup.DELETE("/:id", middleware.RoleRequired("customer", "admin"), bookingHandler.DeleteOne)
 	}
 }
