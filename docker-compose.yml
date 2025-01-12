@@ -15,6 +15,12 @@ services:
     entrypoint: ["go", "run", "main.go"]
     networks:
       - ticket_network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+        reservations:
+          cpus: "0.5"
 
   database:
     image: postgres:15
@@ -31,6 +37,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - ticket_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
 
 volumes:
   postgres_data:
