@@ -45,6 +45,16 @@ func (r *UserRespository) UpdateOne(ctx context.Context, userId uint, updateData
 
 	return user, nil
 }
+func (r *UserRespository) UpdateOneProvider(ctx context.Context, userId uint, updateData map[string]interface{}) (*entity.User, error) {
+	user := &entity.User{}
+	res := r.db.Model(&user).Where("id = ?", userId).Updates(updateData)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return user, nil
+}
 func (r *UserRespository) DeleteOne(ctx context.Context, userId uint) error {
 	user := &entity.User{}
 	res := r.db.Model(&user).Where("id = ?", userId).Delete(&user)

@@ -70,10 +70,38 @@ func (ResponseMessage) DeleteSuccessfully(name string) string {
 func (ResponseMessage) DeleteFailed(name string) string {
 	return fmt.Sprintf("Delete %s failed", name)
 }
+func (ResponseMessage) DeleteAllSuccessfully(name string) string {
+	return fmt.Sprintf("Delete all %s successfully", name)
+}
+
+func (ResponseMessage) DeleteAllFailed(name string) string {
+	return fmt.Sprintf("Delete all %s failed", name)
+}
 
 func (ResponseMessage) RequestFailed(name string) string {
 	return fmt.Sprintf("Invalid %s request payload", name)
 }
 func (ResponseMessage) NotFound(name string) string {
 	return fmt.Sprintf("Fetch %s not found", name)
+}
+
+func (ResponseMessage) LoginFailed() string {
+	return "Login failed"
+}
+func (ResponseMessage) LoginFailedEntity() string {
+	return "Payload is failed"
+}
+
+func (ResponseMessage) LoginSuccessfully() string {
+	return "Login successfully"
+}
+func (ResponseMessage) RegisterFailed() string {
+	return "Register failed"
+}
+func (ResponseMessage) RegisterFailedEntity() string {
+	return "Payload failed"
+}
+
+func (ResponseMessage) RegisterSuccessfully() string {
+	return "Register successfully"
 }

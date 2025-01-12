@@ -50,5 +50,6 @@ type UserRepository interface {
 	GetMany(ctx context.Context) ([]*User, error)
 	GetOne(ctx context.Context, userId uint) (*UserWithRelation, error)
 	UpdateOne(ctx context.Context, userId uint, updateData map[string]interface{}) (*User, error)
+	UpdateOneProvider(ctx context.Context, userId uint, updateData map[string]interface{}) (*User, error)
 	DeleteOne(ctx context.Context, userId uint) error
 }

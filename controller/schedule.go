@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/Junx27/ticket-booking/entity"
@@ -11,7 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var secretKey = os.Getenv("JWT_SECRET")
+var responseScheduleName = "schedule"
+var responseSchedule helper.ResponseMessage
 
 type ScheduleHandler struct {
 	repository entity.ScheduleRepository
@@ -26,31 +26,31 @@ func NewScheduleHandler(repo entity.ScheduleRepository) *ScheduleHandler {
 func (h *ScheduleHandler) GetMany(ctx *gin.Context) {
 	schedules, err := h.repository.GetMany(context.Background())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch schedules"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseSchedule.GetFailed(responseScheduleName)))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Fetch data schedules successfully", schedules))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseSchedule.GetSuccessfully(responseScheduleName), schedules))
 }
 
 func (h *ScheduleHandler) GetOne(ctx *gin.Context) {
 	scheduleId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid schedule ID"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseSchedule.IdFailed(responseScheduleName)))
 		return
 	}
 
 	schedule, err := h.repository.GetOne(context.Background(), uint(scheduleId))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch schedule"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseSchedule.GetFailed(responseScheduleName)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Fetch data schedule successfully", schedule))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseSchedule.GetSuccessfully(responseScheduleName), schedule))
 }
 func (h *ScheduleHandler) CreateOne(ctx *gin.Context) {
 	var schedule entity.Schedule
 	if err := ctx.ShouldBindJSON(&schedule); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid request payload"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseSchedule.RequestFailed(responseScheduleName)))
 		return
 	}
 	userID, err := helper.GetUserIDFromCookie(ctx)
@@ -64,39 +64,39 @@ func (h *ScheduleHandler) CreateOne(ctx *gin.Context) {
 	schedule.UserID = userID
 	createdSchedule, err := h.repository.CreateOne(context.Background(), &schedule)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to create schedule"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseSchedule.CreateFailed(responseScheduleName)))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Create schedule successfully", createdSchedule))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseSchedule.CreateSuccessfully(responseScheduleName), createdSchedule))
 }
 
 func (h *ScheduleHandler) UpdateOne(ctx *gin.Context) {
 	scheduleId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid schedule ID"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseSchedule.IdFailed(responseScheduleName)))
 		return
 	}
 
 	var updateData map[string]interface{}
 	if err := ctx.ShouldBindJSON(&updateData); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid request payload"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseSchedule.RequestFailed(responseScheduleName)))
 		return
 	}
 
 	updatedSchedule, err := h.repository.UpdateOne(context.Background(), uint(scheduleId), updateData)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to update schedule"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseSchedule.UpdateFailed(responseScheduleName)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Update schedule successfully", updatedSchedule))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseSchedule.UpdateSuccessfully(responseScheduleName), updatedSchedule))
 }
 
 func (h *ScheduleHandler) UpdateSeatsStatus(ctx *gin.Context) {
 	scheduleIdParam := ctx.Param("id")
 	scheduleId, err := strconv.Atoi(scheduleIdParam)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid schedule ID"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseSchedule.IdFailed(responseScheduleName)))
 		return
 	}
 
@@ -136,14 +136,14 @@ func (h *ScheduleHandler) UpdateSeatsStatus(ctx *gin.Context) {
 func (h *ScheduleHandler) DeleteOne(ctx *gin.Context) {
 	scheduleId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid schedule ID"))
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseSchedule.IdFailed(responseScheduleName)))
 		return
 	}
 
 	if err := h.repository.DeleteOne(context.Background(), uint(scheduleId)); err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to delete schedule"))
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseSchedule.DeleteFailed(responseScheduleName)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, helper.SuccessResponse("Delete schedule successfully", nil))
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseSchedule.DeleteSuccessfully(responseScheduleName), nil))
 }

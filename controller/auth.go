@@ -32,16 +32,16 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&creds); err != nil {
 		ctx.JSON(400, gin.H{
-			"status":  "fail",
-			"message": err.Error(),
+			"status":  "false",
+			"message": helper.ResponseMessage.LoginFailed(helper.ResponseMessage{}),
 		})
 		return
 	}
 
 	if err := validate.Struct(creds); err != nil {
 		ctx.JSON(400, gin.H{
-			"status":  "fail",
-			"message": err.Error(),
+			"status":  "false",
+			"message": helper.ResponseMessage.LoginFailedEntity(helper.ResponseMessage{}),
 		})
 		return
 	}
@@ -50,13 +50,13 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(400, gin.H{
-			"status":  "fail",
-			"message": err.Error(),
+			"status":  "false",
+			"message": helper.ResponseMessage.LoginFailed(helper.ResponseMessage{}),
 		})
 		return
 	}
 	ctx.SetCookie("token", token, 3600*24*1, "/", "", false, true)
-	ctx.JSON(http.StatusOK, helper.AuthResponse("Login successfully", token))
+	ctx.JSON(http.StatusOK, helper.AuthResponse(helper.ResponseMessage.LoginSuccessfully(helper.ResponseMessage{}), token))
 }
 
 func (h *AuthHandler) Register(ctx *gin.Context) {
@@ -67,16 +67,16 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&creds); err != nil {
 		ctx.JSON(400, gin.H{
-			"status":  "fail",
-			"message": err.Error(),
+			"status":  "false",
+			"message": helper.ResponseMessage.RegisterFailed(helper.ResponseMessage{}),
 		})
 		return
 	}
 
 	if err := validate.Struct(creds); err != nil {
 		ctx.JSON(400, gin.H{
-			"status":  "fail",
-			"message": "Please, provide a valid name, email, and password",
+			"status":  "false",
+			"message": helper.ResponseMessage.RegisterFailedEntity(helper.ResponseMessage{}),
 		})
 		return
 	}
@@ -86,13 +86,13 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(400, gin.H{
-			"status":  "fail",
-			"message": err.Error(),
+			"status":  "false",
+			"message": helper.ResponseMessage.RegisterFailed(helper.ResponseMessage{}),
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, helper.AuthResponse("Register successfully", token))
+	ctx.JSON(http.StatusCreated, helper.AuthResponse(helper.ResponseMessage.RegisterSuccessfully(helper.ResponseMessage{}), token))
 }
 
 func (h *AuthHandler) Logout(ctx *gin.Context) {
