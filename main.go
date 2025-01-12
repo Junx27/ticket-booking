@@ -35,7 +35,7 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "booking service is work! - author Tri Saptono(dibimbing) - Golang Back End Development Batch 1",
+			"message": "booking service is work! - author Tri Saptono - (Dibimbing) - Golang Back End Development Batch 1",
 		})
 	})
 
