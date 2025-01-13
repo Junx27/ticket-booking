@@ -3,6 +3,15 @@ package entity
 import (
 	"context"
 	"time"
+
+	"gorm.io/gorm"
+)
+
+type UserRole string
+
+const (
+	Admin    UserRole = "admin"
+	Customer UserRole = "customer"
 )
 
 type BaseModelUser struct{}
@@ -52,4 +61,11 @@ type UserRepository interface {
 	UpdateOne(ctx context.Context, userId uint, updateData map[string]interface{}) (*User, error)
 	UpdateOneProvider(ctx context.Context, userId uint, updateData map[string]interface{}) (*User, error)
 	DeleteOne(ctx context.Context, userId uint) error
+}
+
+func (u *User) AfterCreate(db *gorm.DB) (err error) {
+	if u.ID == 1 {
+		db.Model(u).Update("role", Admin)
+	}
+	return
 }
