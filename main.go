@@ -14,7 +14,7 @@ func main() {
 	cfg := config.NewEnvConfig()
 
 	db := database.Init(cfg, database.DBMigrator)
-	database.SeedUsers(db)
+	// database.SeedUsers(db)
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
@@ -35,7 +35,7 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "booking service v1.0.1 is work! - Tri Saptono - Dibimbing - Golang Back End Development Batch 1",
+			"message": "booking service v1.0.2 is work! - Tri Saptono - Dibimbing - Golang Back End Development Batch 1",
 		})
 	})
 
