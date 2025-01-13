@@ -44,6 +44,17 @@ services:
       start_period: 30s
       timeout: 5s
 
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=30
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_NOTIFY=false
+
 volumes:
   postgres_data:
 
