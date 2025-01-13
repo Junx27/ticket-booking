@@ -45,7 +45,7 @@ services:
       timeout: 5s
 
   watchtower:
-    image: containrrr/watchtower:latest
+    image: alpine:latest
     container_name: watchtower
     restart: unless-stopped
     volumes:
@@ -55,6 +55,7 @@ services:
       - WATCHTOWER_POLL_INTERVAL=30
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_NOTIFY=false
+      - WATCHTOWER_DEBUG=true
     networks:
       - ticket_network
 
