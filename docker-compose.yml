@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   app:
     image: trisaptono123/ticket-booking-app:2024.1.7
@@ -43,21 +41,6 @@ services:
       retries: 5
       start_period: 30s
       timeout: 5s
-
-  watchtower:
-    image: alpine:latest
-    container_name: watchtower
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /root/.docker/config.json:/config.json:ro
-    environment:
-      - WATCHTOWER_POLL_INTERVAL=30
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_NOTIFY=false
-      - WATCHTOWER_DEBUG=true
-    networks:
-      - ticket_network
 
 volumes:
   postgres_data:
