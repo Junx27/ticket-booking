@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os/exec"
+
 	"github.com/Junx27/ticket-booking/config"
 	"github.com/Junx27/ticket-booking/database"
 	"github.com/Junx27/ticket-booking/repository"
@@ -36,6 +39,20 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "booking service v1.0.0 is work! - Tri Saptono - Dibimbing - Golang Back End Development Batch 1",
+		})
+	})
+
+	r.GET("/deploy", func(c *gin.Context) {
+		scriptPath := "./deploy.sh"
+		cmd := exec.Command("/bin/bash", scriptPath)
+		cmdOutput, err := cmd.CombinedOutput()
+		if err != nil {
+			c.JSON(500, gin.H{"error": fmt.Sprintf("Error executing deploy script: %v", err)})
+			return
+		}
+		c.JSON(200, gin.H{
+			"message": "Deploy script executed successfully",
+			"output":  string(cmdOutput),
 		})
 	})
 
