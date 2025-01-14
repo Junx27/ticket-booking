@@ -35,7 +35,11 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "booking service v1.0.4 is work! - Tri Saptono - Dibimbing - Golang Back End Development Batch 1",
+			"app":          "Ticket Booking App",
+			"author":       "Tri Saptono",
+			"assign":       "Go BE Batch 1 Final Project",
+			"version":      "v1.0.0",
+			"patch_update": "test sync to server",
 		})
 	})
 
