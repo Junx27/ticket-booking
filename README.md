@@ -49,7 +49,7 @@ make stop
 
 # Ticket Booking Documentation
 
-- [API Documentation](https://documenter.getpostman.com/view/32448213/2sAYJ99yCx)
+- [API Documentation](https://documenter.getpostman.com/view/26920342/2sAYQZGXJf)
 - [User Documentation](doc/user.md)
 - [Provider Documentation](doc/provider.md)
 - [Schedule Documentation](doc/schedule.md)
