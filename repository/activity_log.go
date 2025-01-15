@@ -17,8 +17,8 @@ func NewActivityLogRepository(db *gorm.DB) entity.ActivityLogRepository {
 	}
 }
 
-func (r *ActivityLogRepository) GetMany(ctx context.Context) ([]*entity.ActivityLog, error) {
-	var activityLogs []*entity.ActivityLog
+func (r *ActivityLogRepository) GetMany(ctx context.Context) ([]*entity.ActivityLogWithRelation, error) {
+	var activityLogs []*entity.ActivityLogWithRelation
 	if err := r.db.WithContext(ctx).Preload("User").Find(&activityLogs).Error; err != nil {
 		return nil, err
 	}
@@ -33,8 +33,8 @@ func (r *ActivityLogRepository) GetManyByUser(ctx context.Context, userId uint) 
 	return activityLogs, nil
 }
 
-func (r *ActivityLogRepository) GetOne(ctx context.Context, activityLogId uint) (*entity.ActivityLog, error) {
-	activityLogs := &entity.ActivityLog{}
+func (r *ActivityLogRepository) GetOne(ctx context.Context, activityLogId uint) (*entity.ActivityLogWithRelation, error) {
+	activityLogs := &entity.ActivityLogWithRelation{}
 	if err := r.db.WithContext(ctx).Preload("User").Where("id = ?", activityLogId).First(&activityLogs).Error; err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ func NewCancellationRepository(db *gorm.DB) entity.CancellationRepository {
 
 func (r *CancellationRepository) GetMany(ctx context.Context) ([]*entity.Cancellation, error) {
 	var cancellations []*entity.Cancellation
-	if err := r.db.WithContext(ctx).Preload("Booking").Find(&cancellations).Error; err != nil {
+	if err := r.db.WithContext(ctx).Find(&cancellations).Error; err != nil {
 		return nil, err
 	}
 	return cancellations, nil
@@ -33,9 +33,9 @@ func (r *CancellationRepository) GetManyByBookingID(ctx context.Context, booking
 	return cancellations, nil
 }
 
-func (r *CancellationRepository) GetOne(ctx context.Context, cancellationId uint) (*entity.Cancellation, error) {
-	cancellation := &entity.Cancellation{}
-	if err := r.db.WithContext(ctx).Where("id = ?", cancellationId).First(&cancellation).Error; err != nil {
+func (r *CancellationRepository) GetOne(ctx context.Context, cancellationId uint) (*entity.CancellationWithRelation, error) {
+	cancellation := &entity.CancellationWithRelation{}
+	if err := r.db.WithContext(ctx).Preload("Booking").Where("id = ?", cancellationId).First(&cancellation).Error; err != nil {
 		return nil, err
 	}
 	return cancellation, nil

@@ -25,9 +25,9 @@ func (r *RefundRepository) GetMany(ctx context.Context) ([]*entity.Refund, error
 	return refunds, nil
 }
 
-func (r *RefundRepository) GetOne(ctx context.Context, refundId uint) (*entity.Refund, error) {
-	refund := &entity.Refund{}
-	res := r.db.Model(&refund).Where("id = ?", refundId).First(&refund)
+func (r *RefundRepository) GetOne(ctx context.Context, refundId uint) (*entity.RefundWithRelation, error) {
+	refund := &entity.RefundWithRelation{}
+	res := r.db.Model(&refund).Preload("Booking").Where("id = ?", refundId).First(&refund)
 
 	if res.Error != nil {
 		return nil, res.Error

@@ -22,9 +22,8 @@ type Refund struct {
 	BankAccountName   string    `json:"bank_account_name"`
 	CreatedAt         time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	UpdatedAt         time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
-	Booking           Booking   `json:"booking" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 }
-type RefundResponse struct {
+type RefundWithRelation struct {
 	BaseModelRefund
 	ID                uint      `json:"id" gorm:"primaryKey"`
 	BookingID         uint      `json:"-" gorm:"not null"`
@@ -35,12 +34,12 @@ type RefundResponse struct {
 	BankAccountName   string    `json:"bank_account_name"`
 	CreatedAt         time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	UpdatedAt         time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
-	Booking           Booking   `json:"-" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
+	Booking           Booking   `json:"booking" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 }
 
 type RefundRepository interface {
 	GetMany(ctx context.Context) ([]*Refund, error)
-	GetOne(ctx context.Context, refundId uint) (*Refund, error)
+	GetOne(ctx context.Context, refundId uint) (*RefundWithRelation, error)
 	CreateOne(ctx context.Context, refund *Refund) (*Refund, error)
 	UpdateOne(ctx context.Context, refundId uint, updateData map[string]interface{}) (*Refund, error)
 	DeleteOne(ctx context.Context, refundId uint) error
