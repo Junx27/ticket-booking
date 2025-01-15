@@ -85,21 +85,33 @@ func (ResponseMessage) NotFound(name string) string {
 	return fmt.Sprintf("Fetch %s not found", name)
 }
 
-func (ResponseMessage) LoginFailed() string {
-	return "Login failed"
+func (ResponseMessage) LoginFailed() Response {
+	return Response{
+		Success: false,
+		Message: "Login failed please check email and password!",
+	}
 }
-func (ResponseMessage) LoginFailedEntity() string {
-	return "Payload is failed"
+func (ResponseMessage) LoginFailedEntity() Response {
+	return Response{
+		Success: false,
+		Message: "Email and password is not valid!",
+	}
 }
 
 func (ResponseMessage) LoginSuccessfully() string {
 	return "Login successfully"
 }
-func (ResponseMessage) RegisterFailed() string {
-	return "Register failed"
+func (ResponseMessage) RegisterFailed() Response {
+	return Response{
+		Success: false,
+		Message: "Please check email is valid and password minimum 8 character must contain at least one uppercase letter, one number, and one symbol",
+	}
 }
-func (ResponseMessage) RegisterFailedEntity() string {
-	return "Payload failed"
+func (ResponseMessage) RegisterFailedEntity() Response {
+	return Response{
+		Success: false,
+		Message: "Email and password is not valid!",
+	}
 }
 
 func (ResponseMessage) RegisterSuccessfully() string {

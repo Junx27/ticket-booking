@@ -8,6 +8,7 @@ import (
 	"github.com/Junx27/ticket-booking/entity"
 	"github.com/Junx27/ticket-booking/helper"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var responseUserName = "user"
@@ -68,6 +69,20 @@ func (h *UserHandler) UpdateOne(ctx *gin.Context) {
 		return
 	}
 
+	if updateData.Password != "" {
+		if !entity.IsValidPassword(updateData.Password) {
+			ctx.JSON(http.StatusBadRequest, helper.FailedResponse("password minimum 8 character must contain at least one uppercase letter, one number, and one symbol"))
+			return
+		}
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(updateData.Password), bcrypt.DefaultCost)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseUser.UpdateFailed("User")))
+			return
+		}
+
+		updateData.Password = string(hashedPassword)
+	}
+
 	updateFields := map[string]interface{}{
 		"id":           user.ID,
 		"email":        updateData.Email,
@@ -99,6 +114,14 @@ func (h *UserHandler) UpdateOneProvider(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseUser.GetFailed(responseUserName)))
 		return
 	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseUser.UpdateFailed(responseUserName)))
+		return
+	}
+
+	user.Password = string(hashedPassword)
+
 	updateFields := map[string]interface{}{
 		"id":           user.ID,
 		"email":        user.Email,
