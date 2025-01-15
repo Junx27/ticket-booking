@@ -31,28 +31,19 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	defer cancel()
 
 	if err := ctx.ShouldBindJSON(&creds); err != nil {
-		ctx.JSON(400, gin.H{
-			"status":  "false",
-			"message": helper.ResponseMessage.LoginFailed(helper.ResponseMessage{}),
-		})
+		ctx.JSON(http.StatusBadRequest, helper.ResponseMessage.LoginFailed(helper.ResponseMessage{}))
 		return
 	}
 
 	if err := validate.Struct(creds); err != nil {
-		ctx.JSON(400, gin.H{
-			"status":  "false",
-			"message": helper.ResponseMessage.LoginFailedEntity(helper.ResponseMessage{}),
-		})
+		ctx.JSON(http.StatusBadRequest, helper.ResponseMessage.LoginFailedEntity(helper.ResponseMessage{}))
 		return
 	}
 
 	token, _, err := h.service.Login(ctxTimeout, creds)
 
 	if err != nil {
-		ctx.JSON(400, gin.H{
-			"status":  "false",
-			"message": helper.ResponseMessage.LoginFailed(helper.ResponseMessage{}),
-		})
+		ctx.JSON(http.StatusBadRequest, helper.ResponseMessage.LoginFailed(helper.ResponseMessage{}))
 		return
 	}
 	ctx.SetCookie("token", token, 3600*24*1, "/", "", false, true)
@@ -66,18 +57,12 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 	defer cancel()
 
 	if err := ctx.ShouldBindJSON(&creds); err != nil {
-		ctx.JSON(400, gin.H{
-			"status":  "false",
-			"message": helper.ResponseMessage.RegisterFailed(helper.ResponseMessage{}),
-		})
+		ctx.JSON(http.StatusBadRequest, helper.ResponseMessage.RegisterFailed(helper.ResponseMessage{}))
 		return
 	}
 
 	if err := validate.Struct(creds); err != nil {
-		ctx.JSON(400, gin.H{
-			"status":  "false",
-			"message": helper.ResponseMessage.RegisterFailedEntity(helper.ResponseMessage{}),
-		})
+		ctx.JSON(http.StatusBadRequest, helper.ResponseMessage.RegisterFailedEntity(helper.ResponseMessage{}))
 		return
 	}
 
@@ -85,10 +70,7 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 	ctx.SetCookie("token", token, 3600*24*1, "/", "", false, true)
 
 	if err != nil {
-		ctx.JSON(400, gin.H{
-			"status":  "false",
-			"message": helper.ResponseMessage.RegisterFailed(helper.ResponseMessage{}),
-		})
+		ctx.JSON(http.StatusBadRequest, helper.ResponseMessage.RegisterFailed(helper.ResponseMessage{}))
 		return
 	}
 

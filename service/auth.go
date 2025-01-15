@@ -56,6 +56,10 @@ func (s *AuthService) Register(ctx context.Context, registerData *entity.User) (
 		return "", nil, fmt.Errorf("the user email is already in use")
 	}
 
+	if !entity.IsValidPassword(registerData.Password) {
+		return "", nil, fmt.Errorf("password must contain at least one uppercase letter, one number, and one symbol")
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerData.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", nil, err
