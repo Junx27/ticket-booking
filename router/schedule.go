@@ -16,6 +16,7 @@ func SetupScheduleRouter(r *gin.Engine, db *gorm.DB) {
 	scheduleGroup := r.Group("/schedules")
 	scheduleGroup.Use(middleware.AuthProtected(db))
 	{
+		scheduleGroup.GET("/available", middleware.RoleRequired("admin", "customer"), scheduleHandler.GetManyCustomer)
 		scheduleGroup.GET("/", middleware.AccessPermission(scheduleMiddleware), scheduleHandler.GetMany)
 		scheduleGroup.GET("/:id", middleware.AccessPermission(scheduleMiddleware), scheduleHandler.GetOne)
 		scheduleGroup.POST("/", middleware.RoleRequired("provider"), scheduleHandler.CreateOne)

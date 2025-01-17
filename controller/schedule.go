@@ -40,6 +40,15 @@ func (h *ScheduleHandler) GetMany(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseSchedule.GetSuccessfully(responseScheduleName), schedules))
 }
 
+func (h *ScheduleHandler) GetManyCustomer(ctx *gin.Context) {
+	schedules, err := h.repository.GetManyCustomer(context.Background())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseSchedule.GetFailed(responseScheduleName)))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseSchedule.GetSuccessfully(responseScheduleName), schedules))
+}
+
 func (h *ScheduleHandler) GetOne(ctx *gin.Context) {
 	scheduleId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
