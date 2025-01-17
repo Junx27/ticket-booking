@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Junx27/ticket-booking/entity"
 	"gorm.io/gorm"
@@ -15,6 +16,41 @@ func NewBookingRepository(db *gorm.DB) entity.BookingRepository {
 	return &BookingRepository{
 		db: db,
 	}
+}
+func (r *BookingRepository) GetUserID(id uint) (uint, error) {
+	var booking entity.Booking
+	if err := r.db.First(&booking, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, errors.New("booking not found")
+		}
+		return 0, err
+	}
+	return booking.UserID, nil
+}
+func (r *BookingRepository) GetManyByUser(ctx context.Context, userID uint) ([]interface{}, error) {
+
+	bookings, err := r.GetBookingsByUser(ctx, userID)
+	if err != nil {
+
+		return nil, err
+
+	}
+	result := make([]interface{}, len(bookings))
+	for i, booking := range bookings {
+
+		result[i] = booking
+
+	}
+	return result, nil
+
+}
+
+func (r *BookingRepository) GetBookingsByUser(ctx context.Context, userId uint) ([]*entity.Booking, error) {
+	var bookings []*entity.Booking
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&bookings).Error; err != nil {
+		return nil, err
+	}
+	return bookings, nil
 }
 
 func (r *BookingRepository) GetMany(ctx context.Context) ([]*entity.Booking, error) {

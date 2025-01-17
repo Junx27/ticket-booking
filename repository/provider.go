@@ -31,21 +31,17 @@ func (r *ProviderRepository) GetUserID(id uint) (uint, error) {
 func (r *ProviderRepository) GetManyByUser(ctx context.Context, userID uint) ([]interface{}, error) {
 
 	providers, err := r.GetProvidersByUser(ctx, userID)
-
 	if err != nil {
 
 		return nil, err
 
 	}
-
 	result := make([]interface{}, len(providers))
-
 	for i, provider := range providers {
 
 		result[i] = provider
 
 	}
-
 	return result, nil
 
 }

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Junx27/ticket-booking/entity"
 	"github.com/lib/pq"
@@ -16,6 +17,41 @@ func NewScheduleRepository(db *gorm.DB) entity.ScheduleRepository {
 	return &ScheduleRepository{
 		db: db,
 	}
+}
+func (r *ScheduleRepository) GetUserID(id uint) (uint, error) {
+	var schedule entity.Schedule
+	if err := r.db.First(&schedule, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, errors.New("schedule not found")
+		}
+		return 0, err
+	}
+	return schedule.UserID, nil
+}
+func (r *ScheduleRepository) GetManyByUser(ctx context.Context, userID uint) ([]interface{}, error) {
+
+	schedules, err := r.GetSchedulesByUser(ctx, userID)
+	if err != nil {
+
+		return nil, err
+
+	}
+	result := make([]interface{}, len(schedules))
+	for i, schedule := range schedules {
+
+		result[i] = schedule
+
+	}
+	return result, nil
+
+}
+
+func (r *ScheduleRepository) GetSchedulesByUser(ctx context.Context, userId uint) ([]*entity.Schedule, error) {
+	var schedules []*entity.Schedule
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&schedules).Error; err != nil {
+		return nil, err
+	}
+	return schedules, nil
 }
 
 func (r *ScheduleRepository) GetMany(ctx context.Context) ([]*entity.Schedule, error) {
