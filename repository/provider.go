@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Junx27/ticket-booking/entity"
 	"gorm.io/gorm"
@@ -17,9 +18,28 @@ func NewProviderRepository(db *gorm.DB) entity.ProviderRepository {
 	}
 }
 
+func (r *ProviderRepository) GetUserID(id uint) (uint, error) {
+	var provider entity.Provider
+	if err := r.db.First(&provider, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, errors.New("provider not found")
+		}
+		return 0, err
+	}
+	return provider.UserID, nil
+}
+
 func (r *ProviderRepository) GetMany(ctx context.Context) ([]*entity.Provider, error) {
 	var providers []*entity.Provider
 	if err := r.db.WithContext(ctx).Find(&providers).Error; err != nil {
+		return nil, err
+	}
+	return providers, nil
+}
+
+func (r *ProviderRepository) GetManyByUser(ctx context.Context, userId uint) ([]*entity.Provider, error) {
+	var providers []*entity.Provider
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&providers).Error; err != nil {
 		return nil, err
 	}
 	return providers, nil

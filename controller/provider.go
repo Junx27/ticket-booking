@@ -36,6 +36,21 @@ func (h *ProviderHandler) GetMany(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseProvider.GetSuccessfully(responseProviderName), providers))
 }
 
+func (h *ProviderHandler) GetManyByUser(ctx *gin.Context) {
+	userId, err := strconv.Atoi(ctx.Param("user_id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid user ID"))
+		return
+	}
+
+	providers, err := h.repositoryProvider.GetManyByUser(context.Background(), uint(userId))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Failed to fetch providers"))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.SuccessResponse("Fetch data providers successfully", providers))
+}
+
 func (h *ProviderHandler) GetOne(ctx *gin.Context) {
 	providerId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -92,14 +107,6 @@ func (h *ProviderHandler) UpdateOne(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseProvider.IdFailed(responseProviderName)))
 		return
 	}
-	userID, err := helper.GetUserIDFromCookie(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"status":  "fail",
-			"message": err.Error(),
-		})
-		return
-	}
 
 	provider, err := h.repositoryProvider.GetOne(context.Background(), uint(providerId))
 	if err != nil {
@@ -114,7 +121,7 @@ func (h *ProviderHandler) UpdateOne(ctx *gin.Context) {
 	}
 	updateFields := map[string]interface{}{
 		"id":           provider.ID,
-		"user_id":      userID,
+		"user_id":      provider.UserID,
 		"name":         updateData.Name,
 		"description":  updateData.Description,
 		"contact_info": updateData.ContactInfo,

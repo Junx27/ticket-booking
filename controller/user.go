@@ -114,13 +114,6 @@ func (h *UserHandler) UpdateOneProvider(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseUser.GetFailed(responseUserName)))
 		return
 	}
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseUser.UpdateFailed(responseUserName)))
-		return
-	}
-
-	user.Password = string(hashedPassword)
 
 	updateFields := map[string]interface{}{
 		"id":           user.ID,

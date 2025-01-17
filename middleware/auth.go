@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/Junx27/ticket-booking/entity"
+	"github.com/Junx27/ticket-booking/helper"
+	"github.com/Junx27/ticket-booking/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
@@ -159,4 +162,69 @@ func isRoleAllowed(role string, allowedRoles []string) bool {
 		}
 	}
 	return false
+}
+
+func AccessPermissionAction(repo repository.HasUserID) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		resourceID, err := strconv.Atoi(ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid resource ID"))
+			ctx.Abort()
+			return
+		}
+
+		userID, err := helper.GetUserIDFromCookie(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"status":  "fail",
+				"message": err.Error(),
+			})
+			ctx.Abort()
+			return
+		}
+
+		ownerID, err := repo.GetUserID(uint(resourceID))
+		if err != nil {
+			if err.Error() == "provider not found" {
+				ctx.JSON(http.StatusNotFound, helper.FailedResponse("Resource not found"))
+			} else {
+				ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Internal server error"))
+			}
+			ctx.Abort()
+			return
+		}
+		fmt.Printf("UserID: %d, OwnerID: %d\n", userID, ownerID)
+		if userID != ownerID && !isAdmin(userID) {
+			ctx.JSON(http.StatusForbidden, helper.FailedResponse("Access denied"))
+			ctx.Abort()
+			return
+		}
+
+		ctx.Next()
+	}
+}
+
+func AccessPermissionView(repo *repository.ProviderRepository) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		paramID := ctx.Param("user_id")
+		userID, err := helper.GetUserIDFromCookie(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"status":  "fail",
+				"message": err.Error(),
+			})
+			ctx.Abort()
+			return
+		}
+		if paramID != strconv.Itoa(int(userID)) && !isAdmin(userID) {
+			ctx.JSON(http.StatusForbidden, helper.FailedResponse("Access denied"))
+			ctx.Abort()
+			return
+		}
+		ctx.Next()
+	}
+}
+
+func isAdmin(userID uint) bool {
+	return userID == 1
 }
