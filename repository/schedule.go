@@ -54,6 +54,14 @@ func (r *ScheduleRepository) GetMany(ctx context.Context, userId uint) ([]*entit
 	return schedules, nil
 }
 
+func (r *ScheduleRepository) GetManyCustomer(ctx context.Context) ([]*entity.Schedule, error) {
+	var schedules []*entity.Schedule
+	if err := r.db.WithContext(ctx).Find(&schedules).Error; err != nil {
+		return nil, err
+	}
+	return schedules, nil
+}
+
 func (r *ScheduleRepository) GetOne(ctx context.Context, scheduleId uint) (*entity.Schedule, error) {
 	schedule := &entity.Schedule{}
 	if err := r.db.WithContext(ctx).Where("id = ?", scheduleId).First(&schedule).Error; err != nil {
