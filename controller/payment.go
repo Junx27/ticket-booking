@@ -39,7 +39,15 @@ func NewPaymentHandler(
 }
 
 func (h *PaymentHandler) GetMany(ctx *gin.Context) {
-	payments, err := h.paymentRepository.GetMany(context.Background())
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+		return
+	}
+	payments, err := h.paymentRepository.GetMany(context.Background(), userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.GetFailed(responsePaymentName)))
 		return

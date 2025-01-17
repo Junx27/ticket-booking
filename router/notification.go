@@ -11,15 +11,16 @@ import (
 func SetupNotificationRouter(r *gin.Engine, db *gorm.DB) {
 	notificationRepository := repository.NewNotificationRepository(db)
 	notificationHandler := controller.NewNotificationHandler(notificationRepository)
+	notificationMiddleware := notificationRepository.(*repository.NotificationRepository)
 
 	notificationGroup := r.Group("/notifications")
 	notificationGroup.Use(middleware.AuthProtected(db))
 	{
-		notificationGroup.GET("/", middleware.RoleRequired("admin"), notificationHandler.GetMany)
-		notificationGroup.GET("/user/:user_id", notificationHandler.GetManyByUser)
-		notificationGroup.GET("/:id", notificationHandler.GetOne)
+		notificationGroup.GET("/", middleware.AccessPermission(notificationMiddleware), notificationHandler.GetMany)
+		notificationGroup.GET("/user/:user_id", middleware.RoleRequired("admin"), notificationHandler.GetMany)
+		notificationGroup.GET("/:id", middleware.AccessPermission(notificationMiddleware), notificationHandler.GetOne)
 		notificationGroup.PUT("/:id", middleware.RoleRequired("admin"), notificationHandler.UpdateOne)
-		notificationGroup.DELETE("/:id", notificationHandler.DeleteOne)
-		notificationGroup.DELETE("/user/:user_id", notificationHandler.DeleteAllByUser)
+		notificationGroup.DELETE("/:id", middleware.AccessPermission(notificationMiddleware), notificationHandler.DeleteOne)
+		notificationGroup.DELETE("/user/:user_id", middleware.AccessPermission(notificationMiddleware), notificationHandler.DeleteAllByUser)
 	}
 }

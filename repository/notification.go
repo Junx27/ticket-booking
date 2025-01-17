@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Junx27/ticket-booking/entity"
 	"gorm.io/gorm"
@@ -17,15 +18,35 @@ func NewNotificationRepository(db *gorm.DB) entity.NotificationRepository {
 	}
 }
 
-func (r *NotificationRepository) GetMany(ctx context.Context) ([]*entity.Notification, error) {
-	var notifications []*entity.Notification
-	if err := r.db.WithContext(ctx).Find(&notifications).Error; err != nil {
-		return nil, err
+func (r *NotificationRepository) GetUserID(id uint) (uint, error) {
+	var notification entity.Payment
+	if err := r.db.First(&notification, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, errors.New("notification not found")
+		}
+		return 0, err
 	}
-	return notifications, nil
+	return notification.UserID, nil
+}
+func (r *NotificationRepository) GetManyByUser(ctx context.Context, userID uint) ([]interface{}, error) {
+
+	notifications, err := r.GetMany(ctx, userID)
+	if err != nil {
+
+		return nil, err
+
+	}
+	result := make([]interface{}, len(notifications))
+	for i, notification := range notifications {
+
+		result[i] = notification
+
+	}
+	return result, nil
+
 }
 
-func (r *NotificationRepository) GetManyByUser(ctx context.Context, userId uint) ([]*entity.Notification, error) {
+func (r *NotificationRepository) GetMany(ctx context.Context, userId uint) ([]*entity.Notification, error) {
 	var notifications []*entity.Notification
 	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&notifications).Error; err != nil {
 		return nil, err

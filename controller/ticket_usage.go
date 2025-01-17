@@ -24,7 +24,15 @@ func NewTicketUsageHandler(repo entity.TicketUsageRepository) *TicketUsageHanlde
 }
 
 func (h *TicketUsageHanlder) GetMany(ctx *gin.Context) {
-	ticketUsages, err := h.repository.GetMany(context.Background())
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+		return
+	}
+	ticketUsages, err := h.repository.GetMany(context.Background(), userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseTicketUsage.GetFailed(responseTicketUsageName)))
 		return

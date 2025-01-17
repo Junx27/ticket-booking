@@ -22,6 +22,7 @@ type Refund struct {
 	BankAccountName   string    `json:"bank_account_name"`
 	CreatedAt         time.Time `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	UpdatedAt         time.Time `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
+	Booking           Booking   `json:"-" gorm:"foreignKey:BookingID;constraint:OnDelete:CASCADE"`
 }
 type RefundWithRelation struct {
 	BaseModelRefund
