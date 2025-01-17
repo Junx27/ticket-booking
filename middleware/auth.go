@@ -164,9 +164,10 @@ func isRoleAllowed(role string, allowedRoles []string) bool {
 	return false
 }
 
-func AccessPermission(repo repository.HasUserID, roleView, roleAccess string) gin.HandlerFunc {
+func AccessPermission(repo repository.HasUserID) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		resourceIDStr := ctx.Param("id")
+
 		userID, err := helper.GetUserIDFromCookie(ctx)
 		if err != nil {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
@@ -176,51 +177,38 @@ func AccessPermission(repo repository.HasUserID, roleView, roleAccess string) gi
 			ctx.Abort()
 			return
 		}
-		role, err := helper.GetRoleFromToken(ctx)
-		if err != nil || role == "" {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"status":  "fail",
-				"message": "Unauthorized - Missing or invalid role",
-			})
-			ctx.Abort()
-			return
-		}
 
-		if role == "admin" || role == roleView {
-			ctx.Next()
-			return
-		}
-		if role == roleAccess {
-			if resourceIDStr != "" {
-				resourceID, err := strconv.Atoi(resourceIDStr)
-				if err != nil {
-					ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid resource ID"))
-					ctx.Abort()
-					return
-				}
-				ownerID, err := repo.GetUserID(uint(resourceID))
-				if err != nil {
-					ctx.JSON(http.StatusNotFound, helper.FailedResponse("Resource not found"))
-					ctx.Abort()
-					return
-				}
-				if userID != ownerID {
-					ctx.JSON(http.StatusForbidden, helper.FailedResponse("Access denied"))
-					ctx.Abort()
-					return
-				}
-			} else {
-				data, err := repo.GetManyByUser(ctx, userID)
-				if err != nil {
-					ctx.JSON(http.StatusInternalServerError, gin.H{
-						"status":  "fail",
-						"message": "Failed to fetch data",
-					})
-					ctx.Abort()
-					return
-				}
-				ctx.Set("data", data)
+		if resourceIDStr != "" {
+			resourceID, err := strconv.Atoi(resourceIDStr)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid resource ID"))
+				ctx.Abort()
+				return
 			}
+
+			ownerID, err := repo.GetUserID(uint(resourceID))
+			if err != nil {
+				ctx.JSON(http.StatusNotFound, helper.FailedResponse("Resource not found"))
+				ctx.Abort()
+				return
+			}
+
+			if userID != ownerID {
+				ctx.JSON(http.StatusForbidden, helper.FailedResponse("Access denied"))
+				ctx.Abort()
+				return
+			}
+		} else {
+			data, err := repo.GetManyByUser(ctx, userID)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{
+					"status":  "fail",
+					"message": "Failed to fetch data",
+				})
+				ctx.Abort()
+				return
+			}
+			ctx.Set("data", data)
 		}
 		ctx.Next()
 	}

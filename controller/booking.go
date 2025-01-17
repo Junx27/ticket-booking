@@ -40,7 +40,15 @@ func NewBookingHandler(
 }
 
 func (h *BookingHandler) GetMany(ctx *gin.Context) {
-	bookings, err := h.repositoryBooking.GetMany(context.Background())
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+		return
+	}
+	bookings, err := h.repositoryBooking.GetMany(context.Background(), userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.GetFailed(responseBookingName)))
 		return

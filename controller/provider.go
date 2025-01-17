@@ -27,7 +27,15 @@ func NewProviderHandler(repositoryProvider entity.ProviderRepository, repository
 }
 
 func (h *ProviderHandler) GetMany(ctx *gin.Context) {
-	providers, err := h.repositoryProvider.GetMany(context.Background())
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+		return
+	}
+	providers, err := h.repositoryProvider.GetMany(context.Background(), userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseProvider.GetFailed(responseProviderName)))
 		return

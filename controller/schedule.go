@@ -24,7 +24,15 @@ func NewScheduleHandler(repo entity.ScheduleRepository) *ScheduleHandler {
 }
 
 func (h *ScheduleHandler) GetMany(ctx *gin.Context) {
-	schedules, err := h.repository.GetMany(context.Background())
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+		return
+	}
+	schedules, err := h.repository.GetMany(context.Background(), userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseSchedule.GetFailed(responseScheduleName)))
 		return

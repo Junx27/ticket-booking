@@ -29,7 +29,7 @@ func (r *BookingRepository) GetUserID(id uint) (uint, error) {
 }
 func (r *BookingRepository) GetManyByUser(ctx context.Context, userID uint) ([]interface{}, error) {
 
-	bookings, err := r.GetBookingsByUser(ctx, userID)
+	bookings, err := r.GetMany(ctx, userID)
 	if err != nil {
 
 		return nil, err
@@ -45,17 +45,9 @@ func (r *BookingRepository) GetManyByUser(ctx context.Context, userID uint) ([]i
 
 }
 
-func (r *BookingRepository) GetBookingsByUser(ctx context.Context, userId uint) ([]*entity.Booking, error) {
+func (r *BookingRepository) GetMany(ctx context.Context, userId uint) ([]*entity.Booking, error) {
 	var bookings []*entity.Booking
 	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&bookings).Error; err != nil {
-		return nil, err
-	}
-	return bookings, nil
-}
-
-func (r *BookingRepository) GetMany(ctx context.Context) ([]*entity.Booking, error) {
-	var bookings []*entity.Booking
-	if err := r.db.WithContext(ctx).Find(&bookings).Error; err != nil {
 		return nil, err
 	}
 	return bookings, nil

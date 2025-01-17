@@ -30,7 +30,7 @@ func (r *ScheduleRepository) GetUserID(id uint) (uint, error) {
 }
 func (r *ScheduleRepository) GetManyByUser(ctx context.Context, userID uint) ([]interface{}, error) {
 
-	schedules, err := r.GetSchedulesByUser(ctx, userID)
+	schedules, err := r.GetMany(ctx, userID)
 	if err != nil {
 
 		return nil, err
@@ -46,17 +46,9 @@ func (r *ScheduleRepository) GetManyByUser(ctx context.Context, userID uint) ([]
 
 }
 
-func (r *ScheduleRepository) GetSchedulesByUser(ctx context.Context, userId uint) ([]*entity.Schedule, error) {
+func (r *ScheduleRepository) GetMany(ctx context.Context, userId uint) ([]*entity.Schedule, error) {
 	var schedules []*entity.Schedule
 	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&schedules).Error; err != nil {
-		return nil, err
-	}
-	return schedules, nil
-}
-
-func (r *ScheduleRepository) GetMany(ctx context.Context) ([]*entity.Schedule, error) {
-	var schedules []*entity.Schedule
-	if err := r.db.WithContext(ctx).Find(&schedules).Error; err != nil {
 		return nil, err
 	}
 	return schedules, nil

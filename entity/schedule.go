@@ -43,7 +43,7 @@ type ScheduleWithRelation struct {
 }
 
 type ScheduleRepository interface {
-	GetMany(ctx context.Context) ([]*Schedule, error)
+	GetMany(ctx context.Context, userId uint) ([]*Schedule, error)
 	GetOne(ctx context.Context, scheduleId uint) (*Schedule, error)
 	CreateOne(ctx context.Context, schedule *Schedule) (*Schedule, error)
 	UpdateOne(ctx context.Context, scheduleId uint, updateData map[string]interface{}) (*Schedule, error)
