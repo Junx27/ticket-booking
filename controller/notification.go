@@ -24,22 +24,15 @@ func NewNotificationHandler(repo entity.NotificationRepository) *NotificationHan
 }
 
 func (h *NotificationHandler) GetMany(ctx *gin.Context) {
-	notifications, err := h.repository.GetMany(context.Background())
+	userID, err := helper.GetUserIDFromCookie(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseNotification.GetFailed(responseNotificationName)))
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseNotification.GetSuccessfully(responseNotificationName), notifications))
-}
-
-func (h *NotificationHandler) GetManyByUser(ctx *gin.Context) {
-	userId, err := strconv.Atoi(ctx.Param("user_id"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid user ID"))
-		return
-	}
-
-	notifications, err := h.repository.GetManyByUser(context.Background(), uint(userId))
+	notifications, err := h.repository.GetMany(context.Background(), userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseNotification.GetFailed(responseNotificationName)))
 		return

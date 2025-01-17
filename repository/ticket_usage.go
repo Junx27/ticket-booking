@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Junx27/ticket-booking/entity"
 	"gorm.io/gorm"
@@ -16,10 +17,37 @@ func NewTicketUsageRepository(db *gorm.DB) entity.TicketUsageRepository {
 		db: db,
 	}
 }
+func (r *TicketUsageRepository) GetUserID(id uint) (uint, error) {
+	var ticket entity.Payment
+	if err := r.db.First(&ticket, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, errors.New("ticket not found")
+		}
+		return 0, err
+	}
+	return ticket.UserID, nil
+}
+func (r *TicketUsageRepository) GetManyByUser(ctx context.Context, userID uint) ([]interface{}, error) {
 
-func (r *TicketUsageRepository) GetMany(ctx context.Context) ([]*entity.TicketUsage, error) {
+	tickets, err := r.GetMany(ctx, userID)
+	if err != nil {
+
+		return nil, err
+
+	}
+	result := make([]interface{}, len(tickets))
+	for i, ticket := range tickets {
+
+		result[i] = ticket
+
+	}
+	return result, nil
+
+}
+
+func (r *TicketUsageRepository) GetMany(ctx context.Context, userId uint) ([]*entity.TicketUsage, error) {
 	var ticketUsages []*entity.TicketUsage
-	if err := r.db.WithContext(ctx).Find(&ticketUsages).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&ticketUsages).Error; err != nil {
 		return nil, err
 	}
 	return ticketUsages, nil

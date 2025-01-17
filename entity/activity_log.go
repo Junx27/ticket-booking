@@ -13,11 +13,12 @@ func (BaseModelActivityLog) TableName() string {
 
 type ActivityLog struct {
 	BaseModelActivityLog
-	ID          uint      `json:"id" gorm:"primaryKey"`
-	UserID      uint      `json:"user_id"`
-	ActionType  string    `json:"action_type" gorm:"default:INFO"`
-	Description string    `json:"description" gorm:"not null"`
-	Timestamp   time.Time `json:"timestamp" gorm:"default:CURRENT_TIMESTAMP"`
+	ID          uint               `json:"id" gorm:"primaryKey"`
+	UserID      uint               `json:"user_id"`
+	ActionType  string             `json:"action_type" gorm:"default:INFO"`
+	Description string             `json:"description" gorm:"not null"`
+	Timestamp   time.Time          `json:"timestamp" gorm:"default:CURRENT_TIMESTAMP"`
+	User        UserDetailResponse `json:"-" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 type ActivityLogWithRelation struct {
 	BaseModelActivityLog

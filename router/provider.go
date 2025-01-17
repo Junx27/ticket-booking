@@ -12,14 +12,15 @@ func SetupProviderRouter(r *gin.Engine, db *gorm.DB) {
 	providerRepository := repository.NewProviderRepository(db)
 	activityLogRepository := repository.NewActivityLogRepository(db)
 	providerHandler := controller.NewProviderHandler(providerRepository, activityLogRepository)
+	providerMiddleware := providerRepository.(*repository.ProviderRepository)
 
 	providerGroup := r.Group("/providers")
 	providerGroup.Use(middleware.AuthProtected(db))
 	{
-		providerGroup.GET("/", providerHandler.GetMany)
-		providerGroup.GET("/:id", providerHandler.GetOne)
+		providerGroup.GET("/", middleware.AccessPermission(providerMiddleware), providerHandler.GetMany)
+		providerGroup.GET("/:id", middleware.AccessPermission(providerMiddleware), providerHandler.GetOne)
 		providerGroup.POST("/", middleware.RoleRequired("provider"), providerHandler.CreateOne)
-		providerGroup.PUT("/:id", middleware.RoleRequired("admin", "provider"), providerHandler.UpdateOne)
-		providerGroup.DELETE("/:id", middleware.RoleRequired("admin", "provider"), providerHandler.DeleteOne)
+		providerGroup.PUT("/:id", middleware.AccessPermission(providerMiddleware), middleware.RoleRequired("admin", "provider"), providerHandler.UpdateOne)
+		providerGroup.DELETE("/:id", middleware.AccessPermission(providerMiddleware), middleware.RoleRequired("admin", "provider"), providerHandler.DeleteOne)
 	}
 }

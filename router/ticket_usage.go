@@ -11,12 +11,13 @@ import (
 func SetupTicketUsageRouter(r *gin.Engine, db *gorm.DB) {
 	ticketUsageRepository := repository.NewTicketUsageRepository(db)
 	ticketUsageHandler := controller.NewTicketUsageHandler(ticketUsageRepository)
+	ticketMiddleware := ticketUsageRepository.(*repository.TicketUsageRepository)
 
 	ticketUsageGroup := r.Group("/ticket-usages")
 	ticketUsageGroup.Use(middleware.AuthProtected(db))
 	{
-		ticketUsageGroup.GET("/", ticketUsageHandler.GetMany)
-		ticketUsageGroup.GET("/:id", ticketUsageHandler.GetOne)
+		ticketUsageGroup.GET("/", middleware.AccessPermission(ticketMiddleware), ticketUsageHandler.GetMany)
+		ticketUsageGroup.GET("/:id", middleware.AccessPermission(ticketMiddleware), ticketUsageHandler.GetOne)
 		ticketUsageGroup.PUT("/:id", middleware.RoleRequired("provider"), ticketUsageHandler.UpdateOne)
 		ticketUsageGroup.DELETE("/:id", middleware.RoleRequired("admin"), ticketUsageHandler.DeleteOne)
 	}

@@ -15,14 +15,15 @@ func SetupPaymentRouter(r *gin.Engine, db *gorm.DB) {
 	activityLogRepository := repository.NewActivityLogRepository(db)
 	bookingRepository := repository.NewBookingRepository(db)
 	paymentHandler := controller.NewPaymentHandler(paymentRepository, ticketUsageRepository, bookingRepository, activityLogRepository, notificationRepository)
+	paymentMiddleware := paymentRepository.(*repository.PaymentRepository)
 
 	paymentGroup := r.Group("/payments")
 	paymentGroup.Use(middleware.AuthProtected(db))
 	{
-		paymentGroup.GET("/", middleware.RoleRequired("admin"), paymentHandler.GetMany)
-		paymentGroup.GET("/:id", paymentHandler.GetOne)
+		paymentGroup.GET("/", middleware.AccessPermission(paymentMiddleware), middleware.RoleRequired("admin"), paymentHandler.GetMany)
+		paymentGroup.GET("/:id", middleware.AccessPermission(paymentMiddleware), paymentHandler.GetOne)
 		paymentGroup.POST("/", middleware.RoleRequired("customer"), paymentHandler.CreateOne)
-		paymentGroup.PUT("/:id", middleware.RoleRequired("admin"), paymentHandler.UpdateOne)
-		paymentGroup.DELETE("/:id", middleware.RoleRequired("admin"), paymentHandler.DeleteOne)
+		paymentGroup.PUT("/:id", middleware.AccessPermission(paymentMiddleware), middleware.RoleRequired("admin"), paymentHandler.UpdateOne)
+		paymentGroup.DELETE("/:id", middleware.AccessPermission(paymentMiddleware), middleware.RoleRequired("admin"), paymentHandler.DeleteOne)
 	}
 }

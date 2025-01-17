@@ -11,14 +11,15 @@ import (
 func SetupScheduleRouter(r *gin.Engine, db *gorm.DB) {
 	scheduleRepository := repository.NewScheduleRepository(db)
 	scheduleHandler := controller.NewScheduleHandler(scheduleRepository)
+	scheduleMiddleware := scheduleRepository.(*repository.ScheduleRepository)
 
 	scheduleGroup := r.Group("/schedules")
 	scheduleGroup.Use(middleware.AuthProtected(db))
 	{
-		scheduleGroup.GET("/", scheduleHandler.GetMany)
-		scheduleGroup.GET("/:id", scheduleHandler.GetOne)
+		scheduleGroup.GET("/", middleware.AccessPermission(scheduleMiddleware), scheduleHandler.GetMany)
+		scheduleGroup.GET("/:id", middleware.AccessPermission(scheduleMiddleware), scheduleHandler.GetOne)
 		scheduleGroup.POST("/", middleware.RoleRequired("provider"), scheduleHandler.CreateOne)
-		scheduleGroup.PUT("/:id", middleware.RoleRequired("provider", "admin"), scheduleHandler.UpdateOne)
-		scheduleGroup.DELETE("/:id", middleware.RoleRequired("provider", "admin"), scheduleHandler.DeleteOne)
+		scheduleGroup.PUT("/:id", middleware.AccessPermission(scheduleMiddleware), middleware.RoleRequired("provider", "admin"), scheduleHandler.UpdateOne)
+		scheduleGroup.DELETE("/:id", middleware.AccessPermission(scheduleMiddleware), middleware.RoleRequired("provider", "admin"), scheduleHandler.DeleteOne)
 	}
 }

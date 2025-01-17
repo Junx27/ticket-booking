@@ -15,15 +15,18 @@ func (BaseModelSchedule) TableName() string {
 
 type Schedule struct {
 	BaseModelSchedule
-	ID                uint          `json:"id" gorm:"primaryKey"`
-	UserID            uint          `json:"user_id"`
-	ProviderID        uint          `json:"provider_id"`
-	DepartureTime     time.Time     `json:"departure_time" gorm:"not null"`
-	ArrivalTime       time.Time     `json:"arrival_time" gorm:"not null"`
-	DepartureLocation string        `json:"departure_location" gorm:"not null"`
-	ArrivalLocation   string        `json:"arrival_location" gorm:"not null"`
-	AvailableSeats    pq.Int64Array `json:"available_seats" gorm:"type:integer[]"`
-	TicketPrice       float64       `json:"ticket_price" gorm:"not null"`
+	ID                uint               `json:"id" gorm:"primaryKey"`
+	UserID            uint               `json:"user_id"`
+	ProviderID        uint               `json:"provider_id"`
+	DepartureTime     time.Time          `json:"departure_time" gorm:"not null"`
+	ArrivalTime       time.Time          `json:"arrival_time" gorm:"not null"`
+	DepartureLocation string             `json:"departure_location" gorm:"not null"`
+	ArrivalLocation   string             `json:"arrival_location" gorm:"not null"`
+	AvailableSeats    pq.Int64Array      `json:"available_seats" gorm:"type:integer[]"`
+	TicketPrice       float64            `json:"ticket_price" gorm:"not null"`
+	User              UserDetailResponse `json:"-" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Provider          Provider           `json:"-" gorm:"foreignKey:ProviderID;constraint:OnDelete:CASCADE"`
+	Bookings          []Booking          `json:"-" gorm:"foreignKey:ScheduleID;constraint:OnDelete:CASCADE"`
 }
 type ScheduleWithRelation struct {
 	BaseModelSchedule
@@ -43,7 +46,7 @@ type ScheduleWithRelation struct {
 }
 
 type ScheduleRepository interface {
-	GetMany(ctx context.Context) ([]*Schedule, error)
+	GetMany(ctx context.Context, userId uint) ([]*Schedule, error)
 	GetOne(ctx context.Context, scheduleId uint) (*Schedule, error)
 	CreateOne(ctx context.Context, schedule *Schedule) (*Schedule, error)
 	UpdateOne(ctx context.Context, scheduleId uint, updateData map[string]interface{}) (*Schedule, error)

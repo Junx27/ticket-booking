@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Junx27/ticket-booking/entity"
 	"gorm.io/gorm"
@@ -17,9 +18,37 @@ func NewPaymentRepository(db *gorm.DB) entity.PaymentRepository {
 	}
 }
 
-func (r *PaymentRepository) GetMany(ctx context.Context) ([]*entity.Payment, error) {
+func (r *PaymentRepository) GetUserID(id uint) (uint, error) {
+	var payment entity.Payment
+	if err := r.db.First(&payment, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, errors.New("payment not found")
+		}
+		return 0, err
+	}
+	return payment.UserID, nil
+}
+func (r *PaymentRepository) GetManyByUser(ctx context.Context, userID uint) ([]interface{}, error) {
+
+	payments, err := r.GetMany(ctx, userID)
+	if err != nil {
+
+		return nil, err
+
+	}
+	result := make([]interface{}, len(payments))
+	for i, payment := range payments {
+
+		result[i] = payment
+
+	}
+	return result, nil
+
+}
+
+func (r *PaymentRepository) GetMany(ctx context.Context, userId uint) ([]*entity.Payment, error) {
 	var payments []*entity.Payment
-	if err := r.db.WithContext(ctx).Find(&payments).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&payments).Error; err != nil {
 		return nil, err
 	}
 	return payments, nil

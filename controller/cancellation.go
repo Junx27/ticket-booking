@@ -24,7 +24,15 @@ func NewCancellationHandler(repo entity.CancellationRepository) *CancellationHan
 }
 
 func (h *CancellationHandler) GetMany(ctx *gin.Context) {
-	cancellations, err := h.repository.GetMany(context.Background())
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+		return
+	}
+	cancellations, err := h.repository.GetMany(context.Background(), userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseCancellation.GetFailed(responseCancellationName)))
 		return

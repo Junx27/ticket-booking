@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Junx27/ticket-booking/entity"
 	"gorm.io/gorm"
@@ -17,9 +18,37 @@ func NewCancellationRepository(db *gorm.DB) entity.CancellationRepository {
 	}
 }
 
-func (r *CancellationRepository) GetMany(ctx context.Context) ([]*entity.Cancellation, error) {
+func (r *CancellationRepository) GetUserID(id uint) (uint, error) {
+	var cancellation entity.Cancellation
+	if err := r.db.First(&cancellation, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, errors.New("cancellation not found")
+		}
+		return 0, err
+	}
+	return cancellation.UserID, nil
+}
+func (r *CancellationRepository) GetManyByUser(ctx context.Context, userID uint) ([]interface{}, error) {
+
+	cancellations, err := r.GetMany(ctx, userID)
+	if err != nil {
+
+		return nil, err
+
+	}
+	result := make([]interface{}, len(cancellations))
+	for i, cancellation := range cancellations {
+
+		result[i] = cancellation
+
+	}
+	return result, nil
+
+}
+
+func (r *CancellationRepository) GetMany(ctx context.Context, userId uint) ([]*entity.Cancellation, error) {
 	var cancellations []*entity.Cancellation
-	if err := r.db.WithContext(ctx).Find(&cancellations).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&cancellations).Error; err != nil {
 		return nil, err
 	}
 	return cancellations, nil

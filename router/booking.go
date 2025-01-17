@@ -15,14 +15,15 @@ func SetupBookingRouter(r *gin.Engine, db *gorm.DB) {
 	cancellationRepository := repository.NewCancellationRepository(db)
 	notificationRepository := repository.NewNotificationRepository(db)
 	bookingHandler := controller.NewBookingHandler(bookingRepository, scheduleRepository, activityLogRepository, cancellationRepository, notificationRepository)
+	bookingMiddleware := bookingRepository.(*repository.BookingRepository)
 
 	bookingGroup := r.Group("/bookings")
 	bookingGroup.Use(middleware.AuthProtected(db))
 	{
-		bookingGroup.GET("/", bookingHandler.GetMany)
-		bookingGroup.GET("/:id", bookingHandler.GetOne)
+		bookingGroup.GET("/", middleware.AccessPermission(bookingMiddleware), bookingHandler.GetMany)
+		bookingGroup.GET("/:id", middleware.AccessPermission(bookingMiddleware), bookingHandler.GetOne)
 		bookingGroup.POST("/", middleware.RoleRequired("customer"), bookingHandler.CreateOne)
-		bookingGroup.PUT("/:id", middleware.RoleRequired("customer"), bookingHandler.UpdateOne)
-		bookingGroup.DELETE("/:id", middleware.RoleRequired("customer", "admin"), bookingHandler.DeleteOne)
+		bookingGroup.PUT("/:id", middleware.AccessPermission(bookingMiddleware), middleware.RoleRequired("customer"), bookingHandler.UpdateOne)
+		bookingGroup.DELETE("/:id", middleware.AccessPermission(bookingMiddleware), middleware.RoleRequired("customer", "admin"), bookingHandler.DeleteOne)
 	}
 }

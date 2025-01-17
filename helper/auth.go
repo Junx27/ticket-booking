@@ -34,3 +34,33 @@ func GetUserIDFromCookie(ctx *gin.Context) (uint, error) {
 	userID := uint(userIDFloat)
 	return userID, nil
 }
+
+func GetRoleFromToken(ctx *gin.Context) (string, error) {
+
+	cookie, err := ctx.Cookie("token")
+	if err != nil {
+		return "", fmt.Errorf("Authorization token is missing")
+	}
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
+
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	if err != nil {
+		return "", fmt.Errorf("Invalid token")
+	}
+
+	claims, ok := token.Claims.(*jwt.MapClaims)
+	if !ok || !token.Valid {
+		return "", fmt.Errorf("Failed to parse token claims")
+	}
+
+	role, ok := (*claims)["role"].(string)
+	if !ok || role == "" {
+		return "", fmt.Errorf("Missing or invalid role in token")
+	}
+	return role, nil
+}
