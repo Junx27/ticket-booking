@@ -164,15 +164,9 @@ func isRoleAllowed(role string, allowedRoles []string) bool {
 	return false
 }
 
-func AccessPermissionAction(repo repository.HasUserID) gin.HandlerFunc {
+func AccessPermission(repo repository.HasUserID, roleView, roleAccess string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		resourceID, err := strconv.Atoi(ctx.Param("id"))
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid resource ID"))
-			ctx.Abort()
-			return
-		}
-
+		resourceIDStr := ctx.Param("id")
 		userID, err := helper.GetUserIDFromCookie(ctx)
 		if err != nil {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
@@ -182,44 +176,51 @@ func AccessPermissionAction(repo repository.HasUserID) gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
+		role, err := helper.GetRoleFromToken(ctx)
+		if err != nil || role == "" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"status":  "fail",
+				"message": "Unauthorized - Missing or invalid role",
+			})
+			ctx.Abort()
+			return
+		}
 
-		ownerID, err := repo.GetUserID(uint(resourceID))
-		if err != nil {
-			if err.Error() == "provider not found" {
-				ctx.JSON(http.StatusNotFound, helper.FailedResponse("Resource not found"))
+		if role == "admin" || role == roleView {
+			ctx.Next()
+			return
+		}
+		if role == roleAccess {
+			if resourceIDStr != "" {
+				resourceID, err := strconv.Atoi(resourceIDStr)
+				if err != nil {
+					ctx.JSON(http.StatusBadRequest, helper.FailedResponse("Invalid resource ID"))
+					ctx.Abort()
+					return
+				}
+				ownerID, err := repo.GetUserID(uint(resourceID))
+				if err != nil {
+					ctx.JSON(http.StatusNotFound, helper.FailedResponse("Resource not found"))
+					ctx.Abort()
+					return
+				}
+				if userID != ownerID {
+					ctx.JSON(http.StatusForbidden, helper.FailedResponse("Access denied"))
+					ctx.Abort()
+					return
+				}
 			} else {
-				ctx.JSON(http.StatusInternalServerError, helper.FailedResponse("Internal server error"))
+				data, err := repo.GetManyByUser(ctx, userID)
+				if err != nil {
+					ctx.JSON(http.StatusInternalServerError, gin.H{
+						"status":  "fail",
+						"message": "Failed to fetch data",
+					})
+					ctx.Abort()
+					return
+				}
+				ctx.Set("data", data)
 			}
-			ctx.Abort()
-			return
-		}
-		fmt.Printf("UserID: %d, OwnerID: %d\n", userID, ownerID)
-		if userID != ownerID && !isAdmin(userID) {
-			ctx.JSON(http.StatusForbidden, helper.FailedResponse("Access denied"))
-			ctx.Abort()
-			return
-		}
-
-		ctx.Next()
-	}
-}
-
-func AccessPermissionView(repo *repository.ProviderRepository) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		paramID := ctx.Param("user_id")
-		userID, err := helper.GetUserIDFromCookie(ctx)
-		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"status":  "fail",
-				"message": err.Error(),
-			})
-			ctx.Abort()
-			return
-		}
-		if paramID != strconv.Itoa(int(userID)) && !isAdmin(userID) {
-			ctx.JSON(http.StatusForbidden, helper.FailedResponse("Access denied"))
-			ctx.Abort()
-			return
 		}
 		ctx.Next()
 	}

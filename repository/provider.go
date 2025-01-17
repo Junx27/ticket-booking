@@ -28,6 +28,27 @@ func (r *ProviderRepository) GetUserID(id uint) (uint, error) {
 	}
 	return provider.UserID, nil
 }
+func (r *ProviderRepository) GetManyByUser(ctx context.Context, userID uint) ([]interface{}, error) {
+
+	providers, err := r.GetProvidersByUser(ctx, userID)
+
+	if err != nil {
+
+		return nil, err
+
+	}
+
+	result := make([]interface{}, len(providers))
+
+	for i, provider := range providers {
+
+		result[i] = provider
+
+	}
+
+	return result, nil
+
+}
 
 func (r *ProviderRepository) GetMany(ctx context.Context) ([]*entity.Provider, error) {
 	var providers []*entity.Provider
@@ -37,7 +58,7 @@ func (r *ProviderRepository) GetMany(ctx context.Context) ([]*entity.Provider, e
 	return providers, nil
 }
 
-func (r *ProviderRepository) GetManyByUser(ctx context.Context, userId uint) ([]*entity.Provider, error) {
+func (r *ProviderRepository) GetProvidersByUser(ctx context.Context, userId uint) ([]*entity.Provider, error) {
 	var providers []*entity.Provider
 	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&providers).Error; err != nil {
 		return nil, err

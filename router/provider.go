@@ -18,10 +18,9 @@ func SetupProviderRouter(r *gin.Engine, db *gorm.DB) {
 	providerGroup.Use(middleware.AuthProtected(db))
 	{
 		providerGroup.GET("/", middleware.RoleRequired("admin", "customer"), providerHandler.GetMany)
-		providerGroup.GET("/all/:user_id", middleware.AccessPermissionView(providerMiddleware), providerHandler.GetManyByUser)
-		providerGroup.GET("/:id", providerHandler.GetOne)
+		providerGroup.GET("/:id", middleware.AccessPermission(providerMiddleware, "customer", "provider"), providerHandler.GetOne)
 		providerGroup.POST("/", middleware.RoleRequired("provider"), providerHandler.CreateOne)
-		providerGroup.PUT("/:id", middleware.AccessPermissionAction(providerMiddleware), middleware.RoleRequired("admin", "provider"), providerHandler.UpdateOne)
-		providerGroup.DELETE("/:id", middleware.AccessPermissionAction(providerMiddleware), middleware.RoleRequired("admin", "provider"), providerHandler.DeleteOne)
+		providerGroup.PUT("/:id", middleware.AccessPermission(providerMiddleware, "customer", "provider"), middleware.RoleRequired("admin", "provider"), providerHandler.UpdateOne)
+		providerGroup.DELETE("/:id", middleware.AccessPermission(providerMiddleware, "customer", "provider"), middleware.RoleRequired("admin", "provider"), providerHandler.DeleteOne)
 	}
 }
