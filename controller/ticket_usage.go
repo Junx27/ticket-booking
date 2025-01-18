@@ -89,13 +89,26 @@ func (h *TicketUsageHanlder) UpdateOne(ctx *gin.Context) {
 		return
 	}
 
-	var updateData map[string]interface{}
+	ticket, err := h.repository.GetOne(context.Background(), uint(ticketUsageId))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.GetFailed(responsePaymentName)))
+		return
+	}
+
+	var updateData entity.TicketUsage
 	if err := ctx.ShouldBindJSON(&updateData); err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responseTicketUsage.GetFailed(responseTicketUsageName)))
 		return
 	}
 
-	updateRefund, err := h.repository.UpdateOne(context.Background(), uint(ticketUsageId), updateData)
+	updateFields := map[string]interface{}{
+		"id":         ticket.ID,
+		"user_id":    ticket.UserID,
+		"booking_id": ticket.BookingID,
+		"is_used":    updateData.IsUsed,
+	}
+
+	updateRefund, err := h.repository.UpdateOne(context.Background(), uint(ticketUsageId), updateFields)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseTicketUsage.UpdateFailed(responseTicketUsageName)))
 		return

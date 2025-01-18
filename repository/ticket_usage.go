@@ -18,7 +18,7 @@ func NewTicketUsageRepository(db *gorm.DB) entity.TicketUsageRepository {
 	}
 }
 func (r *TicketUsageRepository) GetUserID(id uint) (uint, error) {
-	var ticket entity.Payment
+	var ticket entity.TicketUsage
 	if err := r.db.First(&ticket, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return 0, errors.New("ticket not found")
