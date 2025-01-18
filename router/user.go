@@ -17,10 +17,10 @@ func SetupUserRouter(r *gin.Engine, db *gorm.DB) {
 	userGroup.Use(middleware.AuthProtected(db))
 	{
 		userGroup.GET("/", middleware.RoleRequired("admin"), userHandler.GetMany)
-		userGroup.GET("/:id", userHandler.GetOne)
-		userGroup.PUT("/:id", userHandler.UpdateOne)
+		userGroup.GET("/:id", middleware.RoleRequired("admin"), userHandler.GetOne)
+		userGroup.PUT("/:id", middleware.RoleRequired("admin"), userHandler.UpdateOne)
 		userGroup.PUT("/provider/:id", middleware.RoleRequired("admin"), userHandler.UpdateOneProvider)
-		userGroup.DELETE("/:id", userHandler.DeleteOne)
+		userGroup.DELETE("/:id", middleware.RoleRequired("admin"), userHandler.DeleteOne)
 	}
 }
 func MatchesHash(password, hash string) bool {
