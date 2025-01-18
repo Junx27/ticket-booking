@@ -41,6 +41,17 @@ func (h *TicketUsageHanlder) GetMany(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseTicketUsage.GetSuccessfully(responseTicketUsageName), ticketUsages))
 }
 
+func (h *TicketUsageHanlder) GetManyProvider(ctx *gin.Context) {
+
+	ticketUsages, err := h.repository.GetManyProvider(context.Background())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseTicketUsage.GetFailed(responseTicketUsageName)))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseTicketUsage.GetSuccessfully(responseTicketUsageName), ticketUsages))
+}
+
 func (h *TicketUsageHanlder) GetOne(ctx *gin.Context) {
 	ticketUsageId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {

@@ -16,6 +16,7 @@ func SetupTicketUsageRouter(r *gin.Engine, db *gorm.DB) {
 	ticketUsageGroup := r.Group("/ticket-usages")
 	ticketUsageGroup.Use(middleware.AuthProtected(db))
 	{
+		ticketUsageGroup.GET("/success", middleware.RoleRequired("provider", "admin"), ticketUsageHandler.GetManyProvider)
 		ticketUsageGroup.GET("/", middleware.AccessPermission(ticketMiddleware), ticketUsageHandler.GetMany)
 		ticketUsageGroup.GET("/:id", middleware.AccessPermission(ticketMiddleware), ticketUsageHandler.GetOne)
 		ticketUsageGroup.PUT("/:id", middleware.RoleRequired("provider"), ticketUsageHandler.UpdateOne)
