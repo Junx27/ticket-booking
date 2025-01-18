@@ -53,6 +53,13 @@ func (r *ProviderRepository) GetMany(ctx context.Context, userId uint) ([]*entit
 	}
 	return providers, nil
 }
+func (r *ProviderRepository) GetManyCustomer(ctx context.Context) ([]*entity.Provider, error) {
+	var providers []*entity.Provider
+	if err := r.db.WithContext(ctx).Find(&providers).Error; err != nil {
+		return nil, err
+	}
+	return providers, nil
+}
 
 func (r *ProviderRepository) GetOne(ctx context.Context, providerId uint) (*entity.ProviderWithRelation, error) {
 	provider := &entity.ProviderWithRelation{}

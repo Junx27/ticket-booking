@@ -53,6 +53,14 @@ func (r *TicketUsageRepository) GetMany(ctx context.Context, userId uint) ([]*en
 	return ticketUsages, nil
 }
 
+func (r *TicketUsageRepository) GetManyProvider(ctx context.Context) ([]*entity.TicketUsage, error) {
+	var ticketUsages []*entity.TicketUsage
+	if err := r.db.WithContext(ctx).Find(&ticketUsages).Error; err != nil {
+		return nil, err
+	}
+	return ticketUsages, nil
+}
+
 func (r *TicketUsageRepository) GetOne(ctx context.Context, ticketUsageId uint) (*entity.TicketUsage, error) {
 	ticketUsage := &entity.TicketUsage{}
 	res := r.db.Model(&ticketUsage).Where("id = ?", ticketUsageId).First(&ticketUsage)

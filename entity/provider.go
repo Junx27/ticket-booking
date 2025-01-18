@@ -36,6 +36,7 @@ type ProviderWithRelation struct {
 }
 
 type ProviderRepository interface {
+	GetManyCustomer(ctx context.Context) ([]*Provider, error)
 	GetMany(ctx context.Context, userId uint) ([]*Provider, error)
 	GetOne(ctx context.Context, providerId uint) (*ProviderWithRelation, error)
 	CreateOne(ctx context.Context, provider *Provider) (*Provider, error)

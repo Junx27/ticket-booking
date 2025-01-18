@@ -44,6 +44,16 @@ func (h *ProviderHandler) GetMany(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseProvider.GetSuccessfully(responseProviderName), providers))
 }
 
+func (h *ProviderHandler) GetManyCustomer(ctx *gin.Context) {
+	providers, err := h.repositoryProvider.GetManyCustomer(context.Background())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseProvider.GetFailed(responseProviderName)))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseProvider.GetSuccessfully(responseProviderName), providers))
+}
+
 func (h *ProviderHandler) GetOne(ctx *gin.Context) {
 	providerId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {

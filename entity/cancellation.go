@@ -33,6 +33,7 @@ type CancellationWithRelation struct {
 }
 
 type CancellationRepository interface {
+	GetManyProvider(ctx context.Context) ([]*Cancellation, error)
 	GetMany(ctx context.Context, userId uint) ([]*Cancellation, error)
 	GetManyByBookingID(ctx context.Context, bookingId uint) ([]*Cancellation, error)
 	GetOne(ctx context.Context, cancellationId uint) (*CancellationWithRelation, error)

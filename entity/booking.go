@@ -52,6 +52,7 @@ type BookingWithRelation struct {
 }
 
 type BookingRepository interface {
+	GetManyProvider(ctx context.Context) ([]*Booking, error)
 	GetMany(ctx context.Context, userId uint) ([]*Booking, error)
 	GetOne(ctx context.Context, bookingId uint) (*BookingWithRelation, error)
 	CreateOne(ctx context.Context, booking *Booking) (*Booking, error)

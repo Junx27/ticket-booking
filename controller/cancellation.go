@@ -40,6 +40,15 @@ func (h *CancellationHandler) GetMany(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseCancellation.GetSuccessfully(responseCancellationName), cancellations))
 }
 
+func (h *CancellationHandler) GetManyProvider(ctx *gin.Context) {
+	cancellations, err := h.repository.GetManyProvider(context.Background())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseCancellation.GetFailed(responseCancellationName)))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseCancellation.GetSuccessfully(responseCancellationName), cancellations))
+}
+
 func (h *CancellationHandler) GetManyByBookingID(ctx *gin.Context) {
 	bookingId, err := strconv.Atoi(ctx.Param("booking_id"))
 	if err != nil {

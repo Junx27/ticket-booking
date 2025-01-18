@@ -32,6 +32,7 @@ type TicketUsageStatus struct {
 }
 
 type TicketUsageRepository interface {
+	GetManyProvider(ctx context.Context) ([]*TicketUsage, error)
 	GetMany(ctx context.Context, userId uint) ([]*TicketUsage, error)
 	GetOne(ctx context.Context, ticketUsageId uint) (*TicketUsage, error)
 	CreateOne(ctx context.Context, ticketUsage *TicketUsage) (*TicketUsage, error)
