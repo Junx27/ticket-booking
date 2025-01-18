@@ -60,3 +60,7 @@ make stop
 - [Ticket Usage Documentation](doc/ticket-usage.md)
 - [Activity Log Documentation](doc/activity-log.md)
 - [Refund Documentation](doc/refund.md)
+
+# Presentation
+
+- [My Presentation](https://www.canva.com/design/DAGcXl4eM8w/-XCzgTYO7RvkFcc50UKDUg/edit?utm_content=DAGcXl4eM8w&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
