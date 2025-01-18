@@ -17,6 +17,7 @@ func SetupProviderRouter(r *gin.Engine, db *gorm.DB) {
 	providerGroup := r.Group("/providers")
 	providerGroup.Use(middleware.AuthProtected(db))
 	{
+		providerGroup.GET("/available", middleware.RoleRequired("admin", "customer"), providerHandler.GetManyCustomer)
 		providerGroup.GET("/", middleware.AccessPermission(providerMiddleware), providerHandler.GetMany)
 		providerGroup.GET("/:id", middleware.AccessPermission(providerMiddleware), providerHandler.GetOne)
 		providerGroup.POST("/", middleware.RoleRequired("provider"), providerHandler.CreateOne)
