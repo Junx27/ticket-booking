@@ -16,6 +16,7 @@ func SetupCancellationRouter(r *gin.Engine, db *gorm.DB) {
 	cancellationGroup := r.Group("/cancellations")
 	cancellationGroup.Use(middleware.AuthProtected(db))
 	{
+		cancellationGroup.GET("/success", middleware.RoleRequired("admin", "provider"), cancellationHandler.GetManyProvider)
 		cancellationGroup.GET("/", middleware.AccessPermission(cancellationMiddleware), cancellationHandler.GetMany)
 		cancellationGroup.GET("/booking/:booking_id", middleware.AccessPermission(cancellationMiddleware), cancellationHandler.GetManyByBookingID)
 		cancellationGroup.GET("/:id", middleware.AccessPermission(cancellationMiddleware), cancellationHandler.GetOne)

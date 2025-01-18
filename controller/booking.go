@@ -289,6 +289,7 @@ func (h *BookingHandler) UpdateOne(ctx *gin.Context) {
 	if updateData.BookingStatus == "cancel" {
 		cancellation := entity.Cancellation{
 			BookingID:          booking.ID,
+			UserID:             booking.UserID,
 			CancellationReason: fmt.Sprintf("Booking id %d cancellation is successfully", booking.ID),
 		}
 		_, err := h.cancellationRepository.CreateOne(context.Background(), &cancellation)
