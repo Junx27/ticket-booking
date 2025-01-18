@@ -20,10 +20,11 @@ func SetupPaymentRouter(r *gin.Engine, db *gorm.DB) {
 	paymentGroup := r.Group("/payments")
 	paymentGroup.Use(middleware.AuthProtected(db))
 	{
-		paymentGroup.GET("/", middleware.AccessPermission(paymentMiddleware), middleware.RoleRequired("admin"), paymentHandler.GetMany)
+		paymentGroup.GET("/success", middleware.RoleRequired("provider", "admin"), paymentHandler.GetManyProvider)
+		paymentGroup.GET("/", middleware.AccessPermission(paymentMiddleware), paymentHandler.GetMany)
 		paymentGroup.GET("/:id", middleware.AccessPermission(paymentMiddleware), paymentHandler.GetOne)
 		paymentGroup.POST("/", middleware.RoleRequired("customer"), paymentHandler.CreateOne)
-		paymentGroup.PUT("/:id", middleware.AccessPermission(paymentMiddleware), middleware.RoleRequired("admin"), paymentHandler.UpdateOne)
-		paymentGroup.DELETE("/:id", middleware.AccessPermission(paymentMiddleware), middleware.RoleRequired("admin"), paymentHandler.DeleteOne)
+		paymentGroup.PUT("/:id", middleware.RoleRequired("admin"), paymentHandler.UpdateOne)
+		paymentGroup.DELETE("/:id", middleware.RoleRequired("admin"), paymentHandler.DeleteOne)
 	}
 }

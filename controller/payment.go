@@ -55,6 +55,15 @@ func (h *PaymentHandler) GetMany(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.SuccessResponse(responsePayment.GetSuccessfully(responsePaymentName), payments))
 }
 
+func (h *PaymentHandler) GetManyProvider(ctx *gin.Context) {
+	payments, err := h.paymentRepository.GetManyProvider(context.Background())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.GetFailed(responsePaymentName)))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responsePayment.GetSuccessfully(responsePaymentName), payments))
+}
+
 func (h *PaymentHandler) GetOne(ctx *gin.Context) {
 	paymentId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -77,13 +86,21 @@ func (h *PaymentHandler) CreateOne(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, helper.FailedResponse(responsePayment.RequestFailed(responsePaymentName)))
 		return
 	}
+	userID, err := helper.GetUserIDFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+		return
+	}
 
 	booking, err := h.bookingRepository.GetOne(context.Background(), payment.BookingID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.GetFailed("booking")))
 		return
 	}
-
+	payment.UserID = userID
 	payment.PaymentAmount = booking.TotalAmount
 	createdPayment, err := h.paymentRepository.CreateOne(context.Background(), &payment)
 	if err != nil {
@@ -93,6 +110,7 @@ func (h *PaymentHandler) CreateOne(ctx *gin.Context) {
 
 	ticketUsage := entity.TicketUsage{
 		BookingID: payment.BookingID,
+		UserID:    payment.UserID,
 	}
 	_, err = h.ticketUsageRepositiry.CreateOne(context.Background(), &ticketUsage)
 	if err != nil {
@@ -146,6 +164,7 @@ func (h *PaymentHandler) UpdateOne(ctx *gin.Context) {
 	updateFields := map[string]interface{}{
 		"id":             payment.ID,
 		"booking_id":     payment.BookingID,
+		"user_id":        payment.UserID,
 		"payment_amount": payment.PaymentAmount,
 		"payment_status": updateData.PaymentStatus,
 		"payment_method": payment.PaymentMethod,

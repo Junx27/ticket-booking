@@ -37,6 +37,7 @@ type PaymentWithRelation struct {
 }
 
 type PaymentRepository interface {
+	GetManyProvider(ctx context.Context) ([]*Payment, error)
 	GetMany(ctx context.Context, userId uint) ([]*Payment, error)
 	GetOne(ctx context.Context, paymentId uint) (*PaymentWithRelation, error)
 	CreateOne(ctx context.Context, payment *Payment) (*Payment, error)
