@@ -53,6 +53,14 @@ func (r *BookingRepository) GetMany(ctx context.Context, userId uint) ([]*entity
 	return bookings, nil
 }
 
+func (r *BookingRepository) GetManyProvider(ctx context.Context) ([]*entity.Booking, error) {
+	var bookings []*entity.Booking
+	if err := r.db.WithContext(ctx).Find(&bookings).Error; err != nil {
+		return nil, err
+	}
+	return bookings, nil
+}
+
 func (r *BookingRepository) GetOne(ctx context.Context, bookingId uint) (*entity.BookingWithRelation, error) {
 	booking := &entity.BookingWithRelation{}
 	res := r.db.Model(&booking).Preload("User").Preload("Schedule").Preload("Payment").Preload("Cancellation").Preload("TicketUsage").Preload("Refund").Where("id = ?", bookingId).First(&booking)

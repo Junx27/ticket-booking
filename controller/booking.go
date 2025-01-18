@@ -57,6 +57,16 @@ func (h *BookingHandler) GetMany(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseBooking.GetSuccessfully(responseBookingName), bookings))
 }
 
+func (h *BookingHandler) GetManyProvider(ctx *gin.Context) {
+	bookings, err := h.repositoryBooking.GetManyProvider(context.Background())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.GetFailed(responseBookingName)))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, helper.SuccessResponse(responseBooking.GetSuccessfully(responseBookingName), bookings))
+}
+
 func (h *BookingHandler) GetOne(ctx *gin.Context) {
 	bookingId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
