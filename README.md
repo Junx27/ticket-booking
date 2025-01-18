@@ -1,5 +1,7 @@
 # TICKET BOOKING
 
+![Cover](https://raw.githubusercontent.com/Junx27/ticket-booking/87-final-documentation/doc/assets/cover.png)
+
 ## Docker Image on Development
 
 ```bash
