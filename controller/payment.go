@@ -100,6 +100,21 @@ func (h *PaymentHandler) CreateOne(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responsePayment.GetFailed("booking")))
 		return
 	}
+	updateFields := map[string]interface{}{
+		"id":             booking.ID,
+		"user_id":        booking.UserID,
+		"schedule_id":    booking.ScheduleID,
+		"ticket_code":    booking.TicketCode,
+		"total_amount":   booking.TotalAmount,
+		"booking_status": "payment",
+		"seat_numbers":   booking.SeatNumbers,
+		"created_at":     booking.CreatedAt,
+	}
+	_, err = h.bookingRepository.UpdateOne(context.Background(), payment.BookingID, updateFields)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.FailedResponse(responseBooking.UpdateFailed(responseBookingName)))
+		return
+	}
 	payment.UserID = userID
 	payment.PaymentAmount = booking.TotalAmount
 	createdPayment, err := h.paymentRepository.CreateOne(context.Background(), &payment)
