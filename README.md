@@ -45,7 +45,7 @@ make stop
 
 ## Preview Table of Contents
 
-![Desain Database Relational](https://raw.githubusercontent.com/Junx27/ticket-booking/main/doc/assets/relation.png)
+![Desain Database Relational](https://raw.githubusercontent.com/Junx27/ticket-booking/87-final-documentation/doc/assets/final-erd.png)
 
 # Ticket Booking Documentation
 
